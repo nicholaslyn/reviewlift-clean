@@ -14,86 +14,126 @@
     --brand:#4f46e5; --brand-weak:#eef2ff; --brand-ink:#1e1b4b;
     --radius:16px; --radius-sm:12px;
     --shadow:0 12px 28px rgba(2,8,23,.10);
-    --shadow-strong:0 16px 40px rgba(2,8,23,.16);
-    --ring:#e5e7eb;
-    --grad: radial-gradient(1000px 600px at 10% -10%, #eef2ff 0%, rgba(238,242,255,0) 60%),
-            radial-gradient(900px 500px at 100% 0%, #f0f9ff 0%, rgba(240,249,255,0) 60%),
-            linear-gradient(180deg, #f8fafc 0%, #f6f7ff 100%);
+    --shadow-strong:0 14px 36px rgba(2,8,23,.16);
+    --ring:#e5e7eb; --ring-dark:#1f2937;
+    --bg-grad: radial-gradient(1000px 600px at 10% -10%, #eef2ff 0%, rgba(238,242,255,0) 60%),
+               radial-gradient(900px 500px at 100% 0%, #f0f9ff 0%, rgba(240,249,255,0) 60%),
+               linear-gradient(180deg, #f8fafc 0%, #f6f7ff 100%);
   }
   @media (prefers-color-scheme: dark){
     :root{
       --ink:#e5e7eb; --muted:#94a3b8; --bg:#0b1220; --panel:#0f172a;
-      --brand:#7c72ff; --brand-weak:#1f2240; --brand-ink:#c7d2fe; --ring:#1f2937;
-      --grad: radial-gradient(900px 520px at 0% -10%, #0f172a 0%, rgba(15,23,42,0) 60%),
-              radial-gradient(800px 440px at 100% -10%, #111827 0%, rgba(17,24,39,0) 60%),
-              linear-gradient(180deg, #0b1220 0%, #0e1525 100%);
+      --brand:#7c72ff; --brand-weak:#1f2240; --brand-ink:#c7d2fe;
+      --ring:#1f2937; --ring-dark:#111827;
+      --bg-grad: radial-gradient(900px 520px at 0% -10%, #0f172a 0%, rgba(15,23,42,0) 60%),
+                 radial-gradient(800px 440px at 100% -10%, #111827 0%, rgba(17,24,39,0) 60%),
+                 linear-gradient(180deg, #0b1220 0%, #0e1525 100%);
     }
   }
 
   /* ====== Base ====== */
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);background-image:var(--grad);color:var(--ink);font:15px/1.55 Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial}
+  html,body{margin:0;height:100%;background:var(--bg);background-image:var(--bg-grad);color:var(--ink);font:15px/1.55 Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial}
   a{color:inherit;text-decoration:none}
 
-  /* ====== Header & tabs ====== */
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.72));backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid rgba(2,8,23,.06)}
-  .wrap{max-width:1200px;margin:auto;padding:16px}
+  /* ====== Header / brand / tabs ====== */
+  header{
+    position:sticky; top:0; z-index:10;
+    background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.72));
+    backdrop-filter:saturate(1.2) blur(10px);
+    border-bottom:1px solid rgba(2,8,23,.06)
+  }
+  .wrap{max-width:1100px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px}
-  .brand-dot{width:12px;height:12px;border-radius:999px;background:var(--brand)}
-  .badge{margin-left:6px;font-size:12px;background:var(--brand-weak);color:var(--brand-ink);padding:2px 8px;border-radius:999px;border:1px solid rgba(2,8,23,.06)}
+  .brand-dot{width:12px;height:12px;border-radius:999px;background:var(--brand);}
+  .badge{margin-left:4px;font-size:12px;background:var(--brand-weak);color:var(--brand-ink);padding:2px 8px;border-radius:999px;border:1px solid rgba(2,8,23,.06)}
   nav{display:flex;gap:8px;flex-wrap:wrap}
-  .tab{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(2,8,23,.10);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;box-shadow:0 2px 0 rgba(2,8,23,.03);transition:transform .16s ease, box-shadow .16s ease, background .2s ease;font-weight:700}
+  .tab{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid rgba(2,8,23,.10);
+    background:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;
+    box-shadow:0 2px 0 rgba(2,8,23,.03);
+    transition:transform .16s ease, box-shadow .16s ease, background .2s ease;
+    font-weight:700;color:#0f172a;
+  }
   .tab:hover{transform:translateY(-1px);box-shadow:0 8px 16px rgba(2,8,23,.08)}
-  .tab.active{background:linear-gradient(180deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 80%, #000 20%) 120%);color:#fff;border-color:transparent;box-shadow:0 12px 24px rgba(79,70,229,.30)}
+  .tab.active{
+    background:linear-gradient(180deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 80%, #000 20%) 120%);
+    color:#fff;border-color:transparent;
+    box-shadow:0 10px 24px rgba(79,70,229,.30);
+  }
 
   /* ====== Layout ====== */
-  main{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
-  @media (max-width:1100px){ .wrap{padding:14px} main{grid-template-columns:1fr;gap:16px} }
-  .stack{display:flex;flex-direction:column;gap:14px}
+  main{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start}
+  .stack{display:flex;flex-direction:column;gap:12px}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  @media (max-width:780px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+  .card{
+    background:var(--panel);
+    border:1px solid rgba(2,8,23,.08);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+  }
+  h2{margin:0 0 8px 0;font-size:16px}
+  .hint{color:var(--muted);font-size:12px}
 
-  .card{background:var(--panel);border:1px solid rgba(2,8,23,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-  h2{margin:0 0 10px 0;font-size:18px;letter-spacing:.2px}
-  .sub{color:var(--muted);font-size:12px;margin:-6px 0 8px 0}
-
-  /* Sticky preview on desktop */
-  aside.card{position:sticky;top:90px}
+  /* Sticky preview on desktop for nicer workflow */
+  aside.card{position:sticky; top:88px}
 
   /* ====== Inputs / buttons ====== */
-  input,select,textarea,button{border-radius:var(--radius-sm);border:1px solid rgba(2,8,23,.12);background:#fff;color:var(--ink);padding:12px 12px;font:inherit}
-  input,select,textarea{min-height:44px}
-  textarea{min-height:110px}
-  input::placeholder,textarea::placeholder{color:#94a3b8}
-  input:focus,select:focus,textarea:focus,button:focus{outline:2px solid color-mix(in srgb, var(--brand) 70%, #fff 30%);outline-offset:2px}
+  input,select,textarea,button{
+    border-radius:var(--radius-sm);
+    border:1px solid rgba(2,8,23,.12);
+    background:#fff;color:var(--ink);
+    padding:10px 12px;font:inherit
+  }
+  input::placeholder, textarea::placeholder{color:#94a3b8}
+  input:focus,select:focus,textarea:focus,button:focus{
+    outline:2px solid color-mix(in srgb, var(--brand) 70%, #fff 30%);
+    outline-offset:2px;
+  }
+  textarea{min-height:96px}
   button{cursor:pointer;transition:transform .16s ease, box-shadow .16s ease, background .16s ease}
-  button.primary{background:linear-gradient(180deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 75%, #000 25%) 130%);color:#fff;border-color:transparent;box-shadow:0 10px 22px rgba(79,70,229,.28);font-weight:800}
+  button.primary{
+    background:linear-gradient(180deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 75%, #000 25%) 130%);
+    color:#fff;border-color:transparent;
+    box-shadow:0 10px 22px rgba(79,70,229,.28);
+    font-weight:800;
+  }
   button.primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-strong)}
   button.ghost{background:#fff}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+    border:1px solid rgba(2,8,23,.08);background:var(--brand-weak);color:var(--brand-ink);font-weight:800
+  }
 
   /* ====== Utilities ====== */
-  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:var(--brand-weak);color:var(--brand-ink);font-weight:800}
-  .preset{width:28px;height:28px;border-radius:999px;border:2px solid #fff;box-shadow:0 6px 14px rgba(2,8,23,.15);cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
-  .preset:hover{transform:translateY(-1px);box-shadow:0 12px 20px rgba(2,8,23,.18)}
-  .logoPreview{width:48px;height:48px;border-radius:12px;object-fit:cover;border:1px solid var(--ring)}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .qr{display:grid;place-items:center;background:#fff;border:1px dashed rgba(2,8,23,.18);border-radius:12px;min-height:260px}
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .kpi{border:1px solid rgba(2,8,23,.08);border-radius:14px;padding:16px;background:linear-gradient(180deg,#ffffff 0%, #fbfbff 100%);box-shadow:0 10px 22px rgba(2,8,23,.06)}
-  .num{font-weight:900;font-size:26px;letter-spacing:.2px}
-  .actions{display:flex;gap:10px;flex-wrap:wrap}
-  .section{display:grid;gap:12px}
-  .divider{height:1px;background:rgba(2,8,23,.06);margin:6px 0}
+  .kpi{
+    border:1px solid rgba(2,8,23,.08);border-radius:14px;padding:14px;background:
+    linear-gradient(180deg,#ffffff 0%, #fbfbff 100%);
+    box-shadow:0 8px 18px rgba(2,8,23,.06);
+  }
+  .num{font-weight:900;font-size:24px;letter-spacing:.2px}
+  .preset{width:28px;height:28px;border-radius:999px;border:2px solid #fff;box-shadow:0 6px 14px rgba(2,8,23,.15);cursor:pointer;transition:transform .12s ease, box-shadow .12s ease}
+  .preset:hover{transform:translateY(-1px);box-shadow:0 12px 20px rgba(2,8,23,.18)}
+  .logoPreview{width:44px;height:44px;border-radius:12px;object-fit:cover;border:1px solid var(--ring)}
+  #toastBox{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50}
 
   /* ====== Public page ====== */
   .public{display:grid;place-items:center;min-height:100vh;background:linear-gradient(180deg,#f7f7fb,#eef2ff)}
-  .public .panel{max-width:560px;margin:auto;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:18px;box-shadow:var(--shadow-strong);padding:22px}
+  .public .panel{
+    max-width:560px;margin:auto;background:#fff;border:1px solid rgba(2,8,23,.08);
+    border-radius:18px;box-shadow:var(--shadow-strong);padding:22px
+  }
 
-  /* Toasts */
-  #toastBox{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50}
-  .diag{position:fixed;left:16px;bottom:16px;background:#111827;color:#fff;padding:8px 10px;border-radius:10px;font-size:12px;box-shadow:0 8px 20px rgba(2,8,23,.35);z-index:99}
+  @media (max-width:960px){
+    main{grid-template-columns:1fr}
+    aside.card{position:static}
+  }
 </style>
 </head>
 <body>
@@ -113,61 +153,58 @@
   <!-- SETUP -->
   <section class="card stack" data-pane="setup">
     <h2>Business Setup</h2>
-    <div class="sub">Set your brand, review link, and default message. Changes preview on the right.</div>
+    <div class="row">
+      <label class="grow">Business name<br><input id="bizName" class="grow" placeholder="Acme Barbers"></label>
+      <label>Logo<br><input id="logoFile" type="file" accept="image/*" onchange="RL.onLogoChange(event)"></label>
+      <img id="logoPreview" class="logoPreview" alt="" style="display:none">
+    </div>
+    <div class="row"><label class="grow">Google Maps / Reviews link<br><input id="mapsLink" class="grow" placeholder="Paste your Google listing link"></label></div>
 
-    <!-- Branding block -->
-    <div class="card section" style="padding:14px">
-      <div class="grid-2">
-        <label>Business name<br><input id="bizName" placeholder="Acme Barbers" oninput="/* preview text live via CSS only */"></label>
-        <label>Google Maps / Reviews link<br><input id="mapsLink" placeholder="Paste your Google listing link"></label>
-      </div>
+    <div class="stack">
       <div class="row">
-        <label>Logo<br><input id="logoFile" type="file" accept="image/*" onchange="RL.onLogoChange(event)"></label>
-        <img id="logoPreview" class="logoPreview" alt="" style="display:none">
-      </div>
-      <div class="row" style="align-items:flex-end;gap:14px">
         <label>Brand color<br><input id="brand" type="color" value="#4f46e5" onchange="RL.setBrand(this.value)"></label>
-        <div class="row" style="gap:10px">
-          <div class="preset" style="background:#4f46e5" onclick="RL.setBrand('#4f46e5')"></div>
-          <div class="preset" style="background:#0ea5e9" onclick="RL.setBrand('#0ea5e9')"></div>
-          <div class="preset" style="background:#10b981" onclick="RL.setBrand('#10b981')"></div>
-          <div class="preset" style="background:#ef4444" onclick="RL.setBrand('#ef4444')"></div>
-          <div class="preset" style="background:#f59e0b" onclick="RL.setBrand('#f59e0b')"></div>
-          <div class="preset" style="background:#111827" onclick="RL.setBrand('#111827')"></div>
+        <div class="row" style="gap:8px">
+          <span class="hint">Presets:</span>
+          <div class="preset" data-c="#4f46e5" style="background:#4f46e5" onclick="RL.setBrand('#4f46e5')"></div>
+          <div class="preset" data-c="#0ea5e9" style="background:#0ea5e9" onclick="RL.setBrand('#0ea5e9')"></div>
+          <div class="preset" data-c="#10b981" style="background:#10b981" onclick="RL.setBrand('#10b981')"></div>
+          <div class="preset" data-c="#ef4444" style="background:#ef4444" onclick="RL.setBrand('#ef4444')"></div>
+          <div class="preset" data-c="#f59e0b" style="background:#f59e0b" onclick="RL.setBrand('#f59e0b')"></div>
+          <div class="preset" data-c="#111827" style="background:#111827" onclick="RL.setBrand('#111827')"></div>
         </div>
       </div>
-    </div>
 
-    <!-- Message block -->
-    <div class="card section" style="padding:14px">
       <label>Default ask message<br>
         <textarea id="msg" placeholder="Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}"></textarea>
       </label>
-      <div class="actions">
+
+      <div class="row">
         <button id="saveSetup" class="primary" onclick="RL.saveSetup()">Save</button>
         <button id="copyLink" onclick="RL.copyLink()">Copy Customer Link</button>
         <button id="showQR" onclick="RL.showQR()">Show QR</button>
         <button id="openPreview" class="ghost" onclick="RL.openPreview()">Open public page</button>
-        <span class="sub">Link/QR opens your branded public review page.</span>
+        <span class="hint">Link/QR opens your branded review page.</span>
       </div>
-      <div class="qr" id="qrBox" style="display:none"><img id="qrImg" alt="QR will appear here"/></div>
-    </div>
 
-    <!-- Utilities -->
-    <div class="grid-2">
-      <div class="card">
-        <div class="pill">Backup</div>
-        <div class="actions" style="margin-top:10px">
-          <button id="exportData" onclick="RL.exportData()">Export JSON</button>
-          <button id="importData" onclick="RL.importData()">Import JSON</button>
-        </div>
-        <div class="sub">Back up your settings and activity locally.</div>
+      <div class="qr" id="qrBox" style="display:none">
+        <img id="qrImg" alt="QR will appear here"/>
       </div>
-      <div class="card">
-        <div class="pill">Install</div>
-        <div class="stack" style="margin-top:10px">
-          <div class="sub">iPhone (Safari): Share → Add to Home Screen</div>
-          <div class="sub">Android (Chrome): Menu ⋮ → Add to Home screen</div>
+
+      <div class="cols2">
+        <div class="card">
+          <div class="pill">Backup</div>
+          <div class="row">
+            <button id="exportData" onclick="RL.exportData()">Export JSON</button>
+            <button id="importData" onclick="RL.importData()">Import JSON</button>
+          </div>
+          <div class="hint">Back up your settings and log locally.</div>
+        </div>
+        <div class="card">
+          <div class="pill">Install</div>
+          <div class="stack">
+            <div class="hint">iPhone (Safari): Share → Add to Home Screen</div>
+            <div class="hint">Android (Chrome): Menu ⋮ → Add to Home screen</div>
+          </div>
         </div>
       </div>
     </div>
@@ -176,83 +213,72 @@
   <!-- REQUESTS -->
   <section class="card stack" data-pane="requests" style="display:none">
     <h2>Smart Ask</h2>
-    <div class="sub">Personalize and copy an on-brand review request in one tap.</div>
-    <div class="grid-2">
+    <div class="row">
       <label>Customer first name<br><input id="firstName" placeholder="Sam" oninput="RL.refreshAsk()"></label>
       <label>Visit type<br><input id="visit" placeholder="fade / oil change / cleaning" oninput="RL.refreshAsk()"></label>
     </div>
-    <label>Message preview<br><textarea id="msgOut" class="grow" placeholder="Message will appear here..."></textarea></label>
-    <div class="actions">
+    <div class="row"><textarea id="msgOut" class="grow" placeholder="Message will appear here..."></textarea></div>
+    <div class="row">
       <button id="copySMS" class="primary" onclick="RL.copySMS()">Copy SMS</button>
       <button id="copyWhatsApp" onclick="RL.copyWhatsApp()">Copy WhatsApp</button>
       <button id="copyEmail" onclick="RL.copyEmail()">Copy Email</button>
       <button id="copyLinkOnly" class="ghost" onclick="RL.copyLinkOnly()">Copy review link only</button>
+      <span class="hint">Paste into your messaging app. Each copy logs a request.</span>
     </div>
   </section>
 
   <!-- REPLIES -->
   <section class="card stack" data-pane="replies" style="display:none">
     <h2>Reply Composer</h2>
-    <div class="sub">Generate polished responses for any star rating.</div>
-    <div class="grid-2">
+    <div class="row">
       <label>Customer name<br><input id="rName" placeholder="Sam"></label>
       <label>Stars<br>
-        <select id="rStars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+        <select id="rStars">
+          <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+        </select>
       </label>
     </div>
-    <label>Optional: paste their review<br><textarea id="rText" class="grow" placeholder="Paste their review here (optional)"></textarea></label>
-    <div class="actions"><button class="primary" id="genReply" onclick="RL.genReply()">Generate</button></div>
+    <div class="row"><textarea id="rText" class="grow" placeholder="Paste their review here (optional)"></textarea></div>
+    <div class="row">
+      <button class="primary" id="genReply" onclick="RL.genReply()">Generate</button>
+    </div>
     <div id="replyList" class="stack"></div>
   </section>
 
   <!-- DASHBOARD -->
   <section class="card stack" data-pane="dashboard" style="display:none">
     <h2>Dashboard</h2>
-    <div class="sub">Track sends and marked reviews (local-only in v1).</div>
     <div class="kpis">
-      <div class="kpi"><div class="num" id="kSent">0</div><div class="sub">Requests sent</div></div>
-      <div class="kpi"><div class="num" id="kMarked">0</div><div class="sub">Reviews marked</div></div>
-      <div class="kpi"><div class="num" id="kConv">0%</div><div class="sub">Conversion</div></div>
+      <div class="kpi"><div class="num" id="kSent">0</div><div class="hint">Requests sent</div></div>
+      <div class="kpi"><div class="num" id="kMarked">0</div><div class="hint">Reviews marked</div></div>
+      <div class="kpi"><div class="num" id="kConv">0%</div><div class="hint">Conversion (manual)</div></div>
     </div>
-    <div class="actions" style="margin-top:10px">
-      <button id="markReview" class="primary" onclick="RL.markReview()">+ Mark a new review</button>
-      <button id="exportCSV" onclick="RL.exportCSV()">Export CSV</button>
-      <button id="resetData" onclick="RL.resetData()">Reset</button>
+    <div class="stack">
+      <div class="row">
+        <button id="markReview" class="primary" onclick="RL.markReview()">+ Mark a new review</button>
+        <button id="exportCSV" onclick="RL.exportCSV()">Export CSV</button>
+        <button id="resetData" onclick="RL.resetData()">Reset</button>
+      </div>
+      <div class="hint">V1 tracks sends and reviews locally on this device.</div>
     </div>
   </section>
-
-  <!-- RIGHT: live preview -->
-  <aside class="card stack">
-    <h2>Public page preview</h2>
-    <div class="sub">This is what customers see when they open your link or QR.</div>
-    <div class="card" style="border:1px solid var(--ring);box-shadow:0 12px 28px rgba(2,8,23,.08)">
-      <div class="row" style="gap:10px;align-items:center">
-        <img id="pvLogo" alt="" style="display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--ring);object-fit:cover">
-        <div id="pvName" style="font-weight:900;font-size:18px">Your Business</div>
-      </div>
-      <div class="divider"></div>
-      <div style="margin:10px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
-      <a id="pvBtn" style="display:inline-block;padding:12px 14px;border-radius:12px;color:#fff;background:var(--brand);font-weight:900">Write a Google Review</a>
-      <div class="sub" style="margin-top:8px">Logo/name/color update live as you edit.</div>
-    </div>
-  </aside>
 </main>
 
-<div class="wrap" id="toastBox"></div>
+<div class="wrap" id="toastBox" style="position:fixed;inset:auto 16px 16px auto;display:flex;flex-direction:column;gap:8px;z-index:50"></div>
 <div id="diag" class="diag">Booting…</div>
 
 <script>
-/* ==== JS UNCHANGED: all handlers/IDs stay the same ==== */
 (function(){
   const $ = (sel, el=document) => el.querySelector(sel);
   const diag = $('#diag');
   const log = (s)=>{ diag.style.display='block'; diag.textContent = (diag.textContent? diag.textContent+'\\n' : '') + s; };
 
+  // State & helpers
   const K = { data:'rl_data_v1', log:'rl_log_v1' };
   const S = JSON.parse(localStorage.getItem(K.data) || '{}');
   const LOGS = JSON.parse(localStorage.getItem(K.log) || '[]');
   const save = ()=>{ localStorage.setItem(K.data, JSON.stringify(S)); localStorage.setItem(K.log, JSON.stringify(LOGS)); };
-  const toast=(msg)=>{ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:#0f172a;color:#fff;padding:10px 12px;border-radius:12px;box-shadow:0 10px 24px rgba(2,8,23,.25)'; $('#toastBox').appendChild(t); setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),260)},1900); };
+  const toast=(msg)=>{ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;box-shadow:0 6px 16px rgba(2,8,23,.25)'; $('#toastBox').appendChild(t); setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),260)},1800); };
   const b64=(o)=> btoa(unescape(encodeURIComponent(JSON.stringify(o))));
   const ub64=(s)=>{ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } };
   const defaultMsg=()=>`Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`;
@@ -260,8 +286,12 @@
   const publicLink=()=> location.origin+location.pathname+'#/p/'+b64(payload()));
   const setBrandColor=(c)=>{ document.documentElement.style.setProperty('--brand', c||'#4f46e5'); };
 
+  // Public page route
   if ((location.hash||'').startsWith('#/p/')) {
-    try{ document.querySelector('header').style.display='none'; document.querySelector('main').remove(); }catch(e){}
+    try{
+      document.querySelector('header').style.display='none';
+      document.querySelector('main').remove();
+    }catch(e){}
     const d = ub64(location.hash.replace('#/p/','')) || payload();
     const c = document.createElement('div');
     c.innerHTML = `
@@ -276,7 +306,7 @@
             <a class="btn" id="goBtn" style="text-decoration:none;display:inline-block;text-align:center;background:${d.c};color:#fff;border-radius:12px;padding:12px 14px;font-weight:800">Write a Google Review</a>
             <button id="copyInstr">Copy message</button>
           </div>
-          <div class="sub" style="margin-top:8px">If the button doesn't open directly, tap “Reviews” then “Write a review” on Google.</div>
+          <div class="hint" style="margin-top:8px">If the button doesn't open directly, tap “Reviews” then “Write a review” on Google.</div>
         </div>
       </div>`;
     document.body.appendChild(c);
@@ -286,6 +316,7 @@
     return;
   }
 
+  // Admin boot
   setBrandColor(S.brand||'#4f46e5');
   $('#bizName').value=S.bizName||'';
   $('#mapsLink').value=S.mapsLink||'';
@@ -293,6 +324,7 @@
   $('#msg').value=S.msg||defaultMsg();
   if(S.logo){ const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; }
 
+  // Expose handlers globally for inline onclick fallback
   window.RL = {
     showTab: (pane)=>{
       document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
@@ -300,18 +332,63 @@
       document.querySelector(`.tab[data-tab="${pane}"]`)?.classList.add('active');
       log('Tab: '+pane);
     },
-    setBrand: (c)=>{ $('#brand').value=c; setBrandColor(c); toast('Color set'); },
-    onLogoChange: (e)=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ S.logo=r.result; save(); const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; toast('Logo saved'); }; r.readAsDataURL(f); },
-    saveSetup: ()=>{ S.bizName=$('#bizName').value.trim()||'Your Business'; S.mapsLink=$('#mapsLink').value.trim()||'https://maps.google.com'; S.brand=$('#brand').value||'#4f46e5'; S.msg=$('#msg').value.trim()||defaultMsg(); save(); setBrandColor(S.brand); toast('Saved.'); },
+    setBrand: (c)=>{
+      $('#brand').value=c; setBrandColor(c); toast('Color set');
+    },
+    onLogoChange: (e)=>{
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader(); r.onload=()=>{ S.logo=r.result; save(); const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; toast('Logo saved'); }; r.readAsDataURL(f);
+    },
+    saveSetup: ()=>{
+      S.bizName=$('#bizName').value.trim()||'Your Business';
+      S.mapsLink=$('#mapsLink').value.trim()||'https://maps.google.com';
+      S.brand=$('#brand').value||'#4f46e5';
+      S.msg=$('#msg').value.trim()||defaultMsg();
+      save(); setBrandColor(S.brand); toast('Saved.');
+    },
     copyLink: ()=>{ navigator.clipboard.writeText(publicLink()).then(()=>toast('Link copied'),()=>toast('Copy failed—paste manually')); },
     openPreview: ()=> window.open(publicLink(),'_blank'),
-    showQR: ()=>{ $('#qrBox').style.display='grid'; $('#qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicLink())}`; },
-    refreshAsk: ()=>{ const out=(S.msg||defaultMsg()).replace('{firstName}', ($('#firstName').value||'').trim() || 'there').replace('{visit}', ($('#visit').value||'').trim() || 'visit').replace('{link}', publicLink()); $('#msgOut').value=out; },
+    showQR: ()=>{
+      $('#qrBox').style.display='grid';
+      $('#qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicLink())}`;
+    },
+    refreshAsk: ()=>{
+      const out=(S.msg||defaultMsg())
+        .replace('{firstName}', ($('#firstName').value||'').trim() || 'there')
+        .replace('{visit}', ($('#visit').value||'').trim() || 'visit')
+        .replace('{link}', publicLink());
+      $('#msgOut').value=out;
+    },
     copySMS: ()=>{ RL.refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); LOGS.push({type:'send',channel:'sms',at:new Date().toISOString(),link:publicLink()}); save(); toast('SMS copied'); },
     copyWhatsApp: ()=>{ RL.refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); LOGS.push({type:'send',channel:'whatsapp',at:new Date().toISOString(),link:publicLink()}); save(); toast('WhatsApp copied'); },
     copyEmail: ()=>{ RL.refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); LOGS.push({type:'send',channel:'email',at:new Date().toISOString(),link:publicLink()}); save(); toast('Email copied'); },
     copyLinkOnly: ()=>{ navigator.clipboard.writeText(publicLink()); LOGS.push({type:'send',channel:'link',at:new Date().toISOString(),link:publicLink()}); save(); toast('Review link copied'); },
-    genReply: ()=>{ const name=($('#rName').value||'').trim(), stars=+$('#rStars').value; const tone={5:[`Thanks${name?`, ${name}`:''}! We’re pumped you loved your visit.`,`You made our day${name?`, ${name}`:''}! Thanks for the 5★—we’ll be ready next time.`,`Huge thanks${name?`, ${name}`:''}! Reviews like this keep our small business going.`],4:[`Thanks so much${name?`, ${name}`:''}! Anything we could do to earn that last star?`,`Really appreciate it${name?`, ${name}`:''}. We’re aiming for 5★ next time—thanks!`,`Thanks for the review! We’re glad you had a good experience and we’re pushing for great.`],3:[`Thanks for the honest feedback${name?`, ${name}`:''}. Mind DM’ing us details?`,`We hear you. Please reply so we can make it right.`,`Appreciate the notes. We’re working on this and value your detail.`],2:[`We’re sorry this missed the mark${name?`, ${name}`:''}. Please contact us so we can fix it—this isn’t our standard.`,`Thanks for telling us. We’re addressing this now—could we connect and make it right?`,`We dropped the ball here. If you’ll give us another chance, we’d like to make it up to you.`],1:[`We’re really sorry, ${name||'friend'}. This isn’t acceptable and we want to fix it—please reach us so we can make it right.`,`We hear your frustration and take it seriously. Can we connect to make this right?`,`Thank you for flagging this. We’re reviewing with our team immediately—please DM so we can resolve it.`]}; const list=tone[stars]||tone[5]; const host=$('#replyList'); host.innerHTML=''; list.forEach(s=>{ const p=document.createElement('div'); p.className='card'; p.style.padding='10px'; p.textContent=s; const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px'; const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s); toast('Copied'); }; row.appendChild(b); p.appendChild(row); host.appendChild(p); }); },
+    genReply: ()=>{
+      const name=($('#rName').value||'').trim(), stars=+$('#rStars').value;
+      const tone={
+        5:[`Thanks${name?`, ${name}`:''}! We’re pumped you loved your visit.`,
+           `You made our day${name?`, ${name}`:''}! Thanks for the 5★—we’ll be ready next time.`,
+           `Huge thanks${name?`, ${name}`:''}! Reviews like this keep our small business going.`],
+        4:[`Thanks so much${name?`, ${name}`:''}! Anything we could do to earn that last star?`,
+           `Really appreciate it${name?`, ${name}`:''}. We’re aiming for 5★ next time—thanks!`,
+           `Thanks for the review! We’re glad you had a good experience and we’re pushing for great.`],
+        3:[`Thanks for the honest feedback${name?`, ${name}`:''}. Mind DM’ing us details?`,
+           `We hear you. Please reply so we can make it right.`,
+           `Appreciate the notes. We’re working on this and value your detail.`],
+        2:[`We’re sorry this missed the mark${name?`, ${name}`:''}. Please contact us so we can fix it—this isn’t our standard.`,
+           `Thanks for telling us. We’re addressing this now—could we connect and make it right?`,
+           `We dropped the ball here. If you’ll give us another chance, we’d like to make it up to you.`],
+        1:[`We’re really sorry, ${name||'friend'}. This isn’t acceptable and we want to fix it—please reach us so we can make it right.`,
+           `We hear your frustration and take it seriously. Can we connect to make this right?`,
+           `Thank you for flagging this. We’re reviewing with our team immediately—please DM so we can resolve it.`]
+      };
+      const list=tone[stars]||tone[5]; const host=$('#replyList'); host.innerHTML='';
+      list.forEach(s=>{ const p=document.createElement('div'); p.className='card'; p.style.padding='10px'; p.textContent=s;
+        const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
+        const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s); toast('Copied'); };
+        row.appendChild(b); p.appendChild(row); host.appendChild(p);
+      });
+    },
     markReview: ()=>{ LOGS.push({type:'review',at:new Date().toISOString()}); save(); RL.renderKpis(); },
     exportCSV: ()=>{ const rows=[['type','channel','at','link']].concat(LOGS.map(x=>[x.type,x.channel||'',x.at||'',x.link||''])); const csv=rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='reviewlift-log.csv'; a.click(); },
     resetData: ()=>{ if(confirm('Clear local data?')){ localStorage.removeItem(K.data); localStorage.removeItem(K.log); location.reload(); } },
@@ -324,6 +401,7 @@
   RL.refreshAsk();
   log('Admin ready; inline + listener handlers active');
 
+  // Also attach JS listeners (secondary path)
   document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click', ()=> RL.showTab(btn.dataset.tab)));
   $('#saveSetup').addEventListener('click', RL.saveSetup);
   $('#copyLink').addEventListener('click', RL.copyLink);
@@ -340,6 +418,7 @@
   $('#exportData').addEventListener('click', RL.exportData);
   $('#importData').addEventListener('click', RL.importData);
 
+  // Fill diag with quick environment info
   log('Hash='+(location.hash||'(none)'));
   log('Brand='+(S.brand||'#4f46e5'));
 })();
