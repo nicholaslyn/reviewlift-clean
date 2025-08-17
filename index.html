@@ -8,18 +8,6 @@
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- Safety: clear any old service workers & caches so the app loads fresh -->
-<script>
-  (function(){
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-    }
-    if (window.caches && caches.keys) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-  })();
-</script>
-
 <style>
   :root{
     --ink:#0f172a; --muted:#64748b; --bg:#f7f7fb; --panel:#ffffff;
@@ -61,13 +49,15 @@
   .logoPreview{width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid var(--ring)}
   .public{display:grid;place-items:center;min-height:100vh;background:linear-gradient(180deg,#f7f7fb,#eef2ff)}
   .public .panel{max-width:560px;margin:auto;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:16px;box-shadow:var(--shadow);padding:20px}
+  .badge{margin-left:8px;font-size:12px;background:#eef2ff;color:#1e1b4b;padding:2px 8px;border-radius:999px}
+  .diag{position:fixed;left:16px;bottom:16px;background:#111827;color:#fff;padding:8px 10px;border-radius:10px;font-size:12px;box-shadow:0 8px 20px rgba(2,8,23,.35);z-index:99}
   @media (max-width:960px){ main{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <header>
   <div class="wrap hrow">
-    <div class="brand">ReviewLift — Reviews on Autopilot</div>
+    <div class="brand">ReviewLift — Reviews on Autopilot <span class="badge">v22</span></div>
     <nav>
       <button class="tab active" data-tab="setup">Setup</button>
       <button class="tab" data-tab="requests">Requests</button>
@@ -187,197 +177,212 @@
         <button id="exportCSV">Export CSV</button>
         <button id="resetData">Reset</button>
       </div>
-      <div class="hint">V1 tracks sends and reviews locally on this device. For multi-user analytics, we can add Supabase later.</div>
+      <div class="hint">V1 tracks sends and reviews locally on this device.</div>
     </div>
   </section>
 </main>
 
 <div class="wrap" id="toastBox" style="position:fixed;inset:auto 16px 16px auto;display:flex;flex-direction:column;gap:8px;z-index:50"></div>
+<div id="diag" class="diag" style="display:none"></div>
 
 <script>
-const $ = (sel, el=document) => el.querySelector(sel);
-
-// Storage & helpers
-const K = { data:'rl_data_v1', log:'rl_log_v1' };
-const S = JSON.parse(localStorage.getItem(K.data) || '{}');
-const LOG = JSON.parse(localStorage.getItem(K.log) || '[]');
-function save(){ localStorage.setItem(K.data, JSON.stringify(S)); localStorage.setItem(K.log, JSON.stringify(LOG)); }
-function toast(msg){ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;box-shadow:0 6px 16px rgba(2,8,23,.25)'; $('#toastBox').appendChild(t); setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),260)},1800); }
-function b64(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
-function ub64(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } }
-function defaultMsg(){ return `Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`; }
-function buildPayload(){
-  return {
-    n: S.bizName || 'Your Business',
-    c: S.brand || '#4f46e5',
-    l: S.mapsLink || 'https://maps.google.com',
-    msg: S.msg || defaultMsg(),
-    logo: S.logo || ''
-  };
-}
-function buildPublicLink(){
-  const base = location.origin + location.pathname;
-  return base + '#/p/' + b64(buildPayload());
-}
-
-// Routing
-const hash = location.hash || '#/admin';
-if(hash.startsWith('#/p/')) renderPublic();
-else renderAdmin();
-
-// Admin UI
-function renderAdmin(){
-  // Populate existing values
-  $('#bizName').value = S.bizName || '';
-  $('#mapsLink').value = S.mapsLink || '';
-  $('#brand').value = S.brand || '#4f46e5';
-  $('#msg').value = S.msg || defaultMsg();
-  if(S.logo){ const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; }
-
-  // Tabs
-  document.querySelectorAll('.tab').forEach(btn=>{
-    btn.onclick=()=>{
-      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      const pane=btn.dataset.tab;
-      document.querySelectorAll('[data-pane]').forEach(p=>p.style.display=(p.dataset.pane===pane)?'block':'none');
-    };
-  });
-
-  // Presets
-  document.querySelectorAll('.preset').forEach(el=>{
-    el.onclick=()=>{ $('#brand').value = el.dataset.c; toast('Color set'); };
-  });
-
-  // Logo upload
-  $('#logoFile').onchange=(e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=()=>{ S.logo=r.result; save(); const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; toast('Logo saved'); };
-    r.readAsDataURL(f);
+(function(){
+  // --- Visible error reporting so we never have silent failures ---
+  window.onerror = function(msg, src, line, col, err){
+    const diag = document.getElementById('diag');
+    diag.style.display='block';
+    diag.textContent = 'Error: ' + msg + '\\n' + (src||'') + ':' + (line||'') + ':' + (col||'');
   };
 
-  // Save setup
-  $('#saveSetup').onclick=()=>{
-    S.bizName = $('#bizName').value.trim() || 'Your Business';
-    S.mapsLink = $('#mapsLink').value.trim() || 'https://maps.google.com';
-    S.brand = $('#brand').value || '#4f46e5';
-    S.msg = $('#msg').value.trim() || defaultMsg();
-    save(); toast('Saved.');
-  };
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const diag = document.getElementById('diag');
+  function logDiag(s){ diag.style.display='block'; diag.textContent = (diag.textContent? diag.textContent+'\\n' : '') + s; }
 
-  // Copy/open/QR
-  $('#copyLink').onclick=()=>{ navigator.clipboard.writeText(buildPublicLink()).then(()=>toast('Link copied')); };
-  $('#openPreview').onclick=()=>{ window.open(buildPublicLink(),'_blank'); };
-  $('#showQR').onclick=()=>{
-    const box = $('#qrBox'); box.style.display='grid';
-    const link = encodeURIComponent(buildPublicLink());
-    $('#qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${link}`;
-  };
+  // Storage & helpers
+  const K = { data:'rl_data_v1', log:'rl_log_v1' };
+  const S = JSON.parse(localStorage.getItem(K.data) || '{}');
+  const LOG = JSON.parse(localStorage.getItem(K.log) || '[]');
+  function save(){ localStorage.setItem(K.data, JSON.stringify(S)); localStorage.setItem(K.log, JSON.stringify(LOG)); }
+  function toast(msg){ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;box-shadow:0 6px 16px rgba(2,8,23,.25)'; $('#toastBox').appendChild(t); setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),260)},1800); }
+  function b64(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+  function ub64(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } }
+  function defaultMsg(){ return `Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`; }
+  function buildPayload(){ return { n:S.bizName||'Your Business', c:S.brand||'#4f46e5', l:S.mapsLink||'https://maps.google.com', msg:S.msg||defaultMsg(), logo:S.logo||'' }; }
+  function buildPublicLink(){ const base=location.origin+location.pathname; return base + '#/p/' + b64(buildPayload()); }
 
-  // Requests composer
-  function refreshAsk(){
-    const msg=(S.msg||defaultMsg())
-      .replace('{firstName}', ($('#firstName').value||'').trim() || 'there')
-      .replace('{visit}', ($('#visit').value||'').trim() || 'visit')
-      .replace('{link}', buildPublicLink());
-    $('#msgOut').value = msg;
-  }
-  ['firstName','visit'].forEach(id=>$('#'+id).addEventListener('input',refreshAsk));
-  refreshAsk();
+  function setBrandColor(c){ document.documentElement.style.setProperty('--brand', c||'#4f46e5'); }
 
-  function logSend(ch){ LOG.push({type:'send',channel:ch,at:new Date().toISOString(),link:buildPublicLink()}); save(); renderKpis(); }
-  $('#copySMS').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('sms'); toast('SMS copied'); };
-  $('#copyWhatsApp').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('whatsapp'); toast('WhatsApp copied'); };
-  $('#copyEmail').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('email'); toast('Email copied'); };
-  $('#copyLinkOnly').onclick=()=>{ navigator.clipboard.writeText(buildPublicLink()); logSend('link'); toast('Review link copied'); };
+  function attachAdmin(){
+    // Populate fields
+    const bizName=$('#bizName'), mapsLink=$('#mapsLink'), brand=$('#brand'), msg=$('#msg');
+    if(!bizName || !mapsLink || !brand || !msg){ logDiag('Admin fields not found'); return; }
+    bizName.value = S.bizName || ''; mapsLink.value = S.mapsLink || ''; brand.value = S.brand || '#4f46e5'; msg.value = S.msg || defaultMsg();
+    setBrandColor(brand.value);
 
-  // Replies
-  $('#genReply').onclick=()=>{
-    const name=($('#rName').value||'').trim(), stars=+$('#rStars').value;
-    const tone={
-      5:[`Thanks${name?`, ${name}`:''}! We’re pumped you loved your visit.`,
-         `You made our day${name?`, ${name}`:''}! Thanks for the 5★—we’ll be ready next time.`,
-         `Huge thanks${name?`, ${name}`:''}! Reviews like this keep our small business going.`],
-      4:[`Thanks so much${name?`, ${name}`:''}! Anything we could do to earn that last star?`,
-         `Really appreciate it${name?`, ${name}`:''}. We’re aiming for 5★ next time—thanks!`,
-         `Thanks for the review! We’re glad you had a good experience and we’re pushing for great.`],
-      3:[`Thanks for the honest feedback${name?`, ${name}`:''}. Mind DM’ing us details?`,
-         `We hear you. Please reply so we can make it right.`,
-         `Appreciate the notes. We’re working on this and value your detail.`],
-      2:[`We’re sorry this missed the mark${name?`, ${name}`:''}. Please contact us so we can fix it—this isn’t our standard.`,
-         `Thanks for telling us. We’re addressing this now—could we connect and make it right?`,
-         `We dropped the ball here. If you’ll give us another chance, we’d like to make it up to you.`],
-      1:[`We’re really sorry, ${name||'friend'}. This isn’t acceptable and we want to fix it—please reach us so we can make it right.`,
-         `We hear your frustration and take it seriously. Can we connect to make this right?`,
-         `Thank you for flagging this. We’re reviewing with our team immediately—please DM so we can resolve it.`]
-    };
-    const list=tone[stars]||tone[5]; const host=$('#replyList'); host.innerHTML='';
-    list.forEach(s=>{ const p=document.createElement('div'); p.className='card'; p.style.padding='10px'; p.textContent=s;
-      const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
-      const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s); toast('Copied'); };
-      row.appendChild(b); p.appendChild(row); host.appendChild(p);
+    const logoPrev = $('#logoPreview');
+    if(S.logo){ logoPrev.src=S.logo; logoPrev.style.display='block'; }
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const pane=btn.dataset.tab;
+        document.querySelectorAll('[data-pane]').forEach(p=>p.style.display=(p.dataset.pane===pane)?'block':'none');
+      });
     });
-  };
 
-  // Dashboard
-  function renderKpis(){
-    const sent=LOG.filter(x=>x.type==='send').length;
-    const marked=LOG.filter(x=>x.type==='review').length;
-    $('#kSent').textContent=sent;
-    $('#kMarked').textContent=marked;
-    $('#kConv').textContent= sent? Math.round(marked/sent*100)+'%' : '0%';
+    // Presets
+    document.querySelectorAll('.preset').forEach(el=>{
+      el.addEventListener('click', ()=>{ brand.value=el.dataset.c; setBrandColor(brand.value); toast('Color set'); });
+    });
+
+    // Logo upload
+    $('#logoFile').addEventListener('change', (e)=>{
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader(); r.onload=()=>{ S.logo=r.result; save(); logoPrev.src=S.logo; logoPrev.style.display='block'; toast('Logo saved'); }; r.readAsDataURL(f);
+    });
+
+    // Save
+    $('#saveSetup').addEventListener('click', ()=>{
+      S.bizName = bizName.value.trim()||'Your Business';
+      S.mapsLink = mapsLink.value.trim()||'https://maps.google.com';
+      S.brand = brand.value||'#4f46e5';
+      S.msg = msg.value.trim()||defaultMsg();
+      save(); setBrandColor(S.brand); toast('Saved.');
+    });
+
+    // Link/QR
+    $('#copyLink').addEventListener('click', ()=>{ navigator.clipboard.writeText(buildPublicLink()).then(()=>toast('Link copied')); });
+    $('#openPreview').addEventListener('click', ()=>{ window.open(buildPublicLink(),'_blank'); });
+    $('#showQR').addEventListener('click', ()=>{
+      $('#qrBox').style.display='grid';
+      const link=encodeURIComponent(buildPublicLink());
+      $('#qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${link}`;
+    });
+
+    // Requests composer
+    function refreshAsk(){
+      const out=(S.msg||defaultMsg())
+        .replace('{firstName}', ($('#firstName').value||'').trim() || 'there')
+        .replace('{visit}', ($('#visit').value||'').trim() || 'visit')
+        .replace('{link}', buildPublicLink());
+      $('#msgOut').value = out;
+    }
+    ['firstName','visit'].forEach(id=>$('#'+id).addEventListener('input',refreshAsk));
+    refreshAsk();
+
+    function logSend(ch){ LOG.push({type:'send',channel:ch,at:new Date().toISOString(),link:buildPublicLink()}); save(); renderKpis(); }
+    $('#copySMS').addEventListener('click', ()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('sms'); toast('SMS copied'); });
+    $('#copyWhatsApp').addEventListener('click', ()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('whatsapp'); toast('WhatsApp copied'); });
+    $('#copyEmail').addEventListener('click', ()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('email'); toast('Email copied'); });
+    $('#copyLinkOnly').addEventListener('click', ()=>{ navigator.clipboard.writeText(buildPublicLink()); logSend('link'); toast('Review link copied'); });
+
+    // Replies
+    $('#genReply').addEventListener('click', ()=>{
+      const name=($('#rName').value||'').trim(), stars=+$('#rStars').value;
+      const tone={
+        5:[`Thanks${name?`, ${name}`:''}! We’re pumped you loved your visit.`,
+           `You made our day${name?`, ${name}`:''}! Thanks for the 5★—we’ll be ready next time.`,
+           `Huge thanks${name?`, ${name}`:''}! Reviews like this keep our small business going.`],
+        4:[`Thanks so much${name?`, ${name}`:''}! Anything we could do to earn that last star?`,
+           `Really appreciate it${name?`, ${name}`:''}. We’re aiming for 5★ next time—thanks!`,
+           `Thanks for the review! We’re glad you had a good experience and we’re pushing for great.`],
+        3:[`Thanks for the honest feedback${name?`, ${name}`:''}. Mind DM’ing us details?`,
+           `We hear you. Please reply so we can make it right.`,
+           `Appreciate the notes. We’re working on this and value your detail.`],
+        2:[`We’re sorry this missed the mark${name?`, ${name}`:''}. Please contact us so we can fix it—this isn’t our standard.`,
+           `Thanks for telling us. We’re addressing this now—could we connect and make it right?`,
+           `We dropped the ball here. If you’ll give us another chance, we’d like to make it up to you.`],
+        1:[`We’re really sorry, ${name||'friend'}. This isn’t acceptable and we want to fix it—please reach us so we can make it right.`,
+           `We hear your frustration and take it seriously. Can we connect to make this right?`,
+           `Thank you for flagging this. We’re reviewing with our team immediately—please DM so we can resolve it.`]
+      };
+      const list=tone[stars]||tone[5]; const host=$('#replyList'); host.innerHTML='';
+      list.forEach(s=>{ const p=document.createElement('div'); p.className='card'; p.style.padding='10px'; p.textContent=s;
+        const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
+        const b=document.createElement('button'); b.textContent='Copy'; b.addEventListener('click', ()=>{ navigator.clipboard.writeText(s); toast('Copied'); });
+        row.appendChild(b); p.appendChild(row); host.appendChild(p);
+      });
+    });
+
+    // Dashboard
+    function renderKpis(){
+      const sent=LOG.filter(x=>x.type==='send').length;
+      const marked=LOG.filter(x=>x.type==='review').length;
+      $('#kSent').textContent=sent;
+      $('#kMarked').textContent=marked;
+      $('#kConv').textContent= sent? Math.round(marked/sent*100)+'%' : '0%';
+    }
+    renderKpis();
+    $('#markReview').addEventListener('click', ()=>{ LOG.push({type:'review',at:new Date().toISOString()}); save(); renderKpis(); });
+    $('#exportCSV').addEventListener('click', ()=>{
+      const rows=[['type','channel','at','link']].concat(LOG.map(x=>[x.type,x.channel||'',x.at||'',x.link||'']));
+      const csv=rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\\n');
+      const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='reviewlift-log.csv'; a.click();
+    });
+    $('#resetData').addEventListener('click', ()=>{ if(confirm('Clear local data?')){ localStorage.removeItem(K.data); localStorage.removeItem(K.log); location.reload(); } });
+
+    // Backup / Restore
+    $('#exportData').addEventListener('click', ()=>{
+      const blob=new Blob([JSON.stringify({S,LOG},null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='reviewlift-backup.json'; a.click();
+    });
+    $('#importData').addEventListener('click', ()=>{
+      const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+      inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader();
+        r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o.S){Object.assign(S,o.S);} if(Array.isArray(o.LOG)){LOG.splice(0,LOG.length,...o.LOG);} save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } };
+        r.readAsText(f);
+      }; inp.click();
+    });
+
+    // Self-test button (appears in diag bubble)
+    const testBtn = document.createElement('button');
+    testBtn.textContent='Self-test';
+    testBtn.style.cssText='margin-left:8px;background:#4f46e5;border:0;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer';
+    testBtn.addEventListener('click', ()=>{
+      try{
+        navigator.clipboard.writeText('test');
+        toast('Clipboard OK'); logDiag('Clipboard write attempted');
+      }catch(e){ logDiag('Clipboard blocked: '+e.message); }
+      LOG.push({type:'send',channel:'test',at:new Date().toISOString()}); save();
+      logDiag('LocalStorage OK; log size='+LOG.length);
+    });
+    diag.appendChild(testBtn);
   }
-  renderKpis();
-  $('#markReview').onclick=()=>{ LOG.push({type:'review',at:new Date().toISOString()}); save(); renderKpis(); };
-  $('#exportCSV').onclick=()=>{
-    const rows=[['type','channel','at','link']].concat(LOG.map(x=>[x.type,x.channel||'',x.at||'',x.link||'']));
-    const csv=rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='reviewlift-log.csv'; a.click();
-  };
-  $('#resetData').onclick=()=>{ if(confirm('Clear local data?')){ localStorage.removeItem(K.data); localStorage.removeItem(K.log); location.reload(); } };
 
-  // Backup / Restore
-  $('#exportData').onclick=()=>{
-    const blob=new Blob([JSON.stringify({S,LOG},null,2)],{type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='reviewlift-backup.json'; a.click();
-  };
-  $('#importData').onclick=()=>{
-    const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
-    inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader();
-      r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o.S){Object.assign(S,o.S);} if(Array.isArray(o.LOG)){LOG.splice(0,LOG.length,...o.LOG);} save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } };
-      r.readAsText(f);
-    }; inp.click();
-  };
-}
+  function renderPublic(){
+    const payload = location.hash.replace('#/p/','');
+    const d = ub64(payload) || buildPayload();
+    document.body.style.background = 'linear-gradient(180deg,#f7f7fb,#eef2ff)';
+    document.querySelector('header').style.display='none';
+    document.querySelector('main').remove();
+    const app=document.createElement('div'); document.body.appendChild(app);
+    app.innerHTML = `
+      <div class="public">
+        <div class="panel">
+          <div style="display:flex;align-items:center;gap:10px">
+            ${d.logo? `<img src="${d.logo}" alt="logo" style="width:40px;height:40px;border-radius:8px;border:1px solid var(--ring)">` : ''}
+            <div style="font-weight:900;font-size:20px">${d.n}</div>
+          </div>
+          <div style="margin:12px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
+          <div class="stack">
+            <a class="btn" id="goBtn" style="text-decoration:none;display:inline-block;text-align:center;background:${d.c};color:#fff;border-radius:12px;padding:12px 14px;font-weight:800">Write a Google Review</a>
+            <button id="copyInstr">Copy message</button>
+          </div>
+          <div class="hint" style="margin-top:8px">If the button doesn't open directly, tap “Reviews” then “Write a review” on Google.</div>
+        </div>
+      </div>`;
+    document.getElementById('goBtn').href = d.l;
+    document.getElementById('copyInstr').addEventListener('click', ()=>{ navigator.clipboard.writeText((d.msg||defaultMsg()).replace('{firstName}','').replace('{visit}','visit').replace('{link}', d.l)); alert('Message copied'); });
+  }
 
-// Public page
-function renderPublic(){
-  const payload = location.hash.replace('#/p/','');
-  const d = ub64(payload) || buildPayload();
-  document.body.style.background = 'linear-gradient(180deg,#f7f7fb,#eef2ff)';
-  document.querySelector('header').style.display='none';
-  document.querySelector('main').remove();
-  const app=document.createElement('div'); document.body.appendChild(app);
-  app.innerHTML = `
-    <div class="public">
-      <div class="panel">
-        <div style="display:flex;align-items:center;gap:10px">
-          ${d.logo? `<img src="${d.logo}" alt="logo" style="width:40px;height:40px;border-radius:8px;border:1px solid var(--ring)">` : ''}
-          <div style="font-weight:900;font-size:20px">${d.n}</div>
-        </div>
-        <div style="margin:12px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
-        <div class="stack">
-          <a class="btn" id="goBtn" style="text-decoration:none;display:inline-block;text-align:center;background:${d.c};color:#fff;border-radius:12px;padding:12px 14px;font-weight:800">Write a Google Review</a>
-          <button id="copyInstr">Copy message</button>
-        </div>
-        <div class="hint" style="margin-top:8px">If the button doesn't open directly, tap “Reviews” then “Write a review” on Google.</div>
-      </div>
-    </div>`;
-  $('#goBtn').href = d.l;
-  $('#copyInstr').onclick=()=>{ navigator.clipboard.writeText((d.msg||defaultMsg()).replace('{firstName}','').replace('{visit}','visit').replace('{link}', d.l)); alert('Message copied'); };
-}
+  // --- Boot ---
+  const diagEl = document.getElementById('diag');
+  logDiag('JS loaded; starting…');
+  if((location.hash||'') .startsWith('#/p/')) { logDiag('Public page'); renderPublic(); }
+  else { logDiag('Admin page'); attachAdmin(); }
+})();
 </script>
 </body>
 </html>
-
