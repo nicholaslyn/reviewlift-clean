@@ -8,73 +8,63 @@
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 
+<!-- Safety: clear any old service workers & caches so the app loads fresh -->
+<script>
+  (function(){
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+    }
+    if (window.caches && caches.keys) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+  })();
+</script>
+
 <style>
   :root{
-    --ink:#0f172a; --muted:#6b7280; --bg:#f7f7fb; --panel:#ffffff;
-    --brand:#4f46e5; --brand-weak:#eef2ff;
-    --radius:14px; --shadow:0 8px 26px rgba(2,8,23,.08);
+    --ink:#0f172a; --muted:#64748b; --bg:#f7f7fb; --panel:#ffffff;
+    --brand:#4f46e5; --brand-weak:#eef2ff; --brand-ink:#1e1b4b;
+    --radius:14px; --shadow:0 10px 28px rgba(2,8,23,.10);
+    --ring:#e5e7eb;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --ink:#e5e7eb; --muted:#94a3b8; --bg:#0b1220; --panel:#0f172a; --brand-weak:#1f2240; }
+    :root{ --ink:#e5e7eb; --muted:#94a3b8; --bg:#0b1220; --panel:#0f172a; --brand-weak:#1f2240; --brand-ink:#c7d2fe; --ring:#1f2937; }
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
   a{color:inherit}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,255,255,.7));backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid rgba(2,8,23,.06)}
-  .wrap{max-width:1100px;margin:auto;padding:14px}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.72));backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid rgba(2,8,23,.06)}
+  .wrap{max-width:1100px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{font-weight:900;letter-spacing:.3px}
   nav{display:flex;gap:8px;flex-wrap:wrap}
-  .tab{border:1px solid rgba(2,8,23,.1);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .tab{border:1px solid rgba(2,8,23,.10);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
   .tab.active{background:var(--brand);color:#fff;border-color:transparent;box-shadow:var(--shadow)}
-  main{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
-  .card{background:var(--panel);border:1px solid rgba(2,8,23,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
-  h2{margin:0 0 8px 0;font-size:16px}
+  main{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+  .stack{display:flex;flex-direction:column;gap:12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .card{background:var(--panel);border:1px solid rgba(2,8,23,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  h2{margin:0 0 6px 0;font-size:16px}
   .hint{color:var(--muted);font-size:12px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .stack{display:flex;flex-direction:column;gap:10px}
   input,select,textarea,button{border-radius:12px;border:1px solid rgba(2,8,23,.12);background:#fff;color:var(--ink);padding:10px 12px;font:inherit}
   textarea{min-height:90px}
   button{cursor:pointer;transition:transform .18s ease, box-shadow .18s ease}
-  button.primary{background:var(--brand);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(79,70,229,.25)}
+  button.primary{background:var(--brand);color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(79,70,229,.25)}
+  button.ghost{background:#fff}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:var(--brand-weak);color:var(--brand-ink);font-weight:700}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .qr{display:grid;place-items:center;background:#fff;border:1px dashed rgba(2,8,23,.18);border-radius:12px;min-height:260px}
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .kpi{border:1px solid rgba(2,8,23,.08);border-radius:12px;padding:10px;background:#fff}
+  .kpi{border:1px solid rgba(2,8,23,.08);border-radius:12px;padding:12px;background:#fff}
   .num{font-weight:800;font-size:22px}
-  .qr{display:grid;place-items:center;background:#fff;border:1px dashed rgba(2,8,23,.15);border-radius:12px;min-height:260px}
+  .preset{width:28px;height:28px;border-radius:999px;border:2px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.15);cursor:pointer}
+  .logoPreview{width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid var(--ring)}
   .public{display:grid;place-items:center;min-height:100vh;background:linear-gradient(180deg,#f7f7fb,#eef2ff)}
-  .public .panel{max-width:560px;margin:auto;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:16px;box-shadow:var(--shadow);padding:18px}
-  @media (max-width:960px){main{grid-template-columns:1fr}}
+  .public .panel{max-width:560px;margin:auto;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:16px;box-shadow:var(--shadow);padding:20px}
+  @media (max-width:960px){ main{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-<div id="app"></div>
-
-<script>
-const $ = (sel, el=document) => el.querySelector(sel);
-const app = document.getElementById('app');
-
-// Router: admin vs public
-const hash = location.hash || '#/admin';
-if(hash.startsWith('#/p/')) renderPublic();
-else renderAdmin();
-
-// Storage / utils
-const K = { data:'rl_data_v1', log:'rl_log_v1' };
-const S = JSON.parse(localStorage.getItem(K.data) || '{}');
-const LOG = JSON.parse(localStorage.getItem(K.log) || '[]');
-function save(){ localStorage.setItem(K.data, JSON.stringify(S)); localStorage.setItem(K.log, JSON.stringify(LOG)); }
-function b64(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
-function ub64(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } }
-function defaultMsg(){ return `Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`; }
-function buildPublicLink(){
-  const d = { n:S.bizName||'Your Business', c:S.brand||'#4f46e5', l:S.mapsLink||'https://maps.google.com', msg:S.msg||defaultMsg(), logo:S.logo||'' };
-  const base = location.origin + location.pathname;
-  return base + '#/p/' + b64(d);
-}
-
-// ===== Admin UI
-function renderAdmin(){
-  app.innerHTML = `
 <header>
   <div class="wrap hrow">
     <div class="brand">ReviewLift — Reviews on Autopilot</div>
@@ -88,21 +78,67 @@ function renderAdmin(){
 </header>
 
 <main class="wrap" id="tabs">
+  <!-- SETUP -->
   <section class="card stack" data-pane="setup">
     <h2>Business Setup</h2>
-    <div class="row"><label class="grow">Business name<br><input id="bizName" class="grow" placeholder="Acme Barbers"></label></div>
-    <div class="row"><label class="grow">Google Maps / Reviews link<br><input id="mapsLink" class="grow" placeholder="Paste your Google listing link"></label></div>
-    <div class="row"><label class="grow">Brand color<br><input id="brand" type="color" value="#4f46e5"></label></div>
-    <div class="row"><label class="grow">Default ask message<br><textarea id="msg" placeholder="Hey {firstName}! ... {link}"></textarea></label></div>
     <div class="row">
-      <button id="saveSetup" class="primary">Save</button>
-      <button id="copyLink">Copy Customer Link</button>
-      <button id="showQR">Show QR</button>
-      <span class="hint">The link/QR opens your branded review page.</span>
+      <label class="grow">Business name<br><input id="bizName" class="grow" placeholder="Acme Barbers"></label>
+      <label>Logo<br><input id="logoFile" type="file" accept="image/*"></label>
+      <img id="logoPreview" class="logoPreview" alt="" style="display:none">
     </div>
-    <div id="qrBox" class="qr" style="display:none"><img id="qrImg" alt="QR will appear here"/></div>
+    <div class="row"><label class="grow">Google Maps / Reviews link<br><input id="mapsLink" class="grow" placeholder="Paste your Google listing link"></label></div>
+
+    <div class="stack">
+      <div class="row">
+        <label>Brand color<br><input id="brand" type="color" value="#4f46e5"></label>
+        <div class="row" style="gap:8px">
+          <span class="hint">Presets:</span>
+          <div class="preset" data-c="#4f46e5" style="background:#4f46e5"></div>
+          <div class="preset" data-c="#0ea5e9" style="background:#0ea5e9"></div>
+          <div class="preset" data-c="#10b981" style="background:#10b981"></div>
+          <div class="preset" data-c="#ef4444" style="background:#ef4444"></div>
+          <div class="preset" data-c="#f59e0b" style="background:#f59e0b"></div>
+          <div class="preset" data-c="#111827" style="background:#111827"></div>
+        </div>
+      </div>
+
+      <label>Default ask message<br>
+        <textarea id="msg" placeholder="Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}"></textarea>
+      </label>
+
+      <div class="row">
+        <button id="saveSetup" class="primary">Save</button>
+        <button id="copyLink">Copy Customer Link</button>
+        <button id="showQR">Show QR</button>
+        <button id="openPreview" class="ghost">Open public page</button>
+        <span class="hint">Link/QR opens your branded review page.</span>
+      </div>
+
+      <div class="qr" id="qrBox" style="display:none">
+        <img id="qrImg" alt="QR will appear here"/>
+      </div>
+
+      <div class="cols2">
+        <div class="card">
+          <div class="pill">Backup</div>
+          <div class="row">
+            <button id="exportData">Export JSON</button>
+            <button id="importData">Import JSON</button>
+          </div>
+          <div class="hint">Back up your settings and log locally.</div>
+        </div>
+        <div class="card">
+          <div class="pill">Install</div>
+          <div class="stack">
+            <div class="hint">iPhone (Safari): Share → Add to Home Screen</div>
+            <div class="hint">Android (Chrome): Menu ⋮ → Add to Home screen</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
+  <!-- REQUESTS -->
   <section class="card stack" data-pane="requests" style="display:none">
     <h2>Smart Ask</h2>
     <div class="row">
@@ -114,10 +150,12 @@ function renderAdmin(){
       <button id="copySMS" class="primary">Copy SMS</button>
       <button id="copyWhatsApp">Copy WhatsApp</button>
       <button id="copyEmail">Copy Email</button>
-      <span class="hint">Paste into your messaging app. Each send logs a request.</span>
+      <button id="copyLinkOnly" class="ghost">Copy review link only</button>
+      <span class="hint">Paste into your messaging app. Each copy logs a request.</span>
     </div>
   </section>
 
+  <!-- REPLIES -->
   <section class="card stack" data-pane="replies" style="display:none">
     <h2>Reply Composer</h2>
     <div class="row">
@@ -135,6 +173,7 @@ function renderAdmin(){
     <div id="replyList" class="stack"></div>
   </section>
 
+  <!-- DASHBOARD -->
   <section class="card stack" data-pane="dashboard" style="display:none">
     <h2>Dashboard</h2>
     <div class="kpis">
@@ -148,17 +187,52 @@ function renderAdmin(){
         <button id="exportCSV">Export CSV</button>
         <button id="resetData">Reset</button>
       </div>
-      <div class="hint">This V1 tracks sends and reviews locally (manual mark). For cross-device analytics, we can add Supabase later.</div>
+      <div class="hint">V1 tracks sends and reviews locally on this device. For multi-user analytics, we can add Supabase later.</div>
     </div>
   </section>
 </main>
-`;
 
-  // Populate
+<div class="wrap" id="toastBox" style="position:fixed;inset:auto 16px 16px auto;display:flex;flex-direction:column;gap:8px;z-index:50"></div>
+
+<script>
+const $ = (sel, el=document) => el.querySelector(sel);
+
+// Storage & helpers
+const K = { data:'rl_data_v1', log:'rl_log_v1' };
+const S = JSON.parse(localStorage.getItem(K.data) || '{}');
+const LOG = JSON.parse(localStorage.getItem(K.log) || '[]');
+function save(){ localStorage.setItem(K.data, JSON.stringify(S)); localStorage.setItem(K.log, JSON.stringify(LOG)); }
+function toast(msg){ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:#0f172a;color:#fff;padding:8px 10px;border-radius:10px;box-shadow:0 6px 16px rgba(2,8,23,.25)'; $('#toastBox').appendChild(t); setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),260)},1800); }
+function b64(o){ return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function ub64(s){ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } }
+function defaultMsg(){ return `Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`; }
+function buildPayload(){
+  return {
+    n: S.bizName || 'Your Business',
+    c: S.brand || '#4f46e5',
+    l: S.mapsLink || 'https://maps.google.com',
+    msg: S.msg || defaultMsg(),
+    logo: S.logo || ''
+  };
+}
+function buildPublicLink(){
+  const base = location.origin + location.pathname;
+  return base + '#/p/' + b64(buildPayload());
+}
+
+// Routing
+const hash = location.hash || '#/admin';
+if(hash.startsWith('#/p/')) renderPublic();
+else renderAdmin();
+
+// Admin UI
+function renderAdmin(){
+  // Populate existing values
   $('#bizName').value = S.bizName || '';
   $('#mapsLink').value = S.mapsLink || '';
   $('#brand').value = S.brand || '#4f46e5';
   $('#msg').value = S.msg || defaultMsg();
+  if(S.logo){ const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; }
 
   // Tabs
   document.querySelectorAll('.tab').forEach(btn=>{
@@ -170,22 +244,38 @@ function renderAdmin(){
     };
   });
 
-  // Save + link/QR
-  $('#saveSetup').onclick=()=>{
-    S.bizName=$('#bizName').value.trim()||'Your Business';
-    S.mapsLink=$('#mapsLink').value.trim()||'https://maps.google.com';
-    S.brand=$('#brand').value||'#4f46e5';
-    S.msg=$('#msg').value.trim()||defaultMsg();
-    save(); alert('Saved.');
-  };
-  $('#copyLink').onclick=()=>{ navigator.clipboard.writeText(buildPublicLink()).then(()=>alert('Link copied')); };
-  $('#showQR').onclick=()=>{
-    const box=$('#qrBox'); box.style.display='grid';
-    const link=encodeURIComponent(buildPublicLink());
-    $('#qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${link}`;
+  // Presets
+  document.querySelectorAll('.preset').forEach(el=>{
+    el.onclick=()=>{ $('#brand').value = el.dataset.c; toast('Color set'); };
+  });
+
+  // Logo upload
+  $('#logoFile').onchange=(e)=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ S.logo=r.result; save(); const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; toast('Logo saved'); };
+    r.readAsDataURL(f);
   };
 
-  // Smart Ask
+  // Save setup
+  $('#saveSetup').onclick=()=>{
+    S.bizName = $('#bizName').value.trim() || 'Your Business';
+    S.mapsLink = $('#mapsLink').value.trim() || 'https://maps.google.com';
+    S.brand = $('#brand').value || '#4f46e5';
+    S.msg = $('#msg').value.trim() || defaultMsg();
+    save(); toast('Saved.');
+  };
+
+  // Copy/open/QR
+  $('#copyLink').onclick=()=>{ navigator.clipboard.writeText(buildPublicLink()).then(()=>toast('Link copied')); };
+  $('#openPreview').onclick=()=>{ window.open(buildPublicLink(),'_blank'); };
+  $('#showQR').onclick=()=>{
+    const box = $('#qrBox'); box.style.display='grid';
+    const link = encodeURIComponent(buildPublicLink());
+    $('#qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${link}`;
+  };
+
+  // Requests composer
   function refreshAsk(){
     const msg=(S.msg||defaultMsg())
       .replace('{firstName}', ($('#firstName').value||'').trim() || 'there')
@@ -197,11 +287,12 @@ function renderAdmin(){
   refreshAsk();
 
   function logSend(ch){ LOG.push({type:'send',channel:ch,at:new Date().toISOString(),link:buildPublicLink()}); save(); renderKpis(); }
-  $('#copySMS').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('sms'); alert('SMS copied'); };
-  $('#copyWhatsApp').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('whatsapp'); alert('WhatsApp copied'); };
-  $('#copyEmail').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('email'); alert('Email copied'); };
+  $('#copySMS').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('sms'); toast('SMS copied'); };
+  $('#copyWhatsApp').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('whatsapp'); toast('WhatsApp copied'); };
+  $('#copyEmail').onclick=()=>{ refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); logSend('email'); toast('Email copied'); };
+  $('#copyLinkOnly').onclick=()=>{ navigator.clipboard.writeText(buildPublicLink()); logSend('link'); toast('Review link copied'); };
 
-  // Reply Composer
+  // Replies
   $('#genReply').onclick=()=>{
     const name=($('#rName').value||'').trim(), stars=+$('#rStars').value;
     const tone={
@@ -224,7 +315,7 @@ function renderAdmin(){
     const list=tone[stars]||tone[5]; const host=$('#replyList'); host.innerHTML='';
     list.forEach(s=>{ const p=document.createElement('div'); p.className='card'; p.style.padding='10px'; p.textContent=s;
       const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
-      const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s); alert('Copied'); };
+      const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s); toast('Copied'); };
       row.appendChild(b); p.appendChild(row); host.appendChild(p);
     });
   };
@@ -245,21 +336,37 @@ function renderAdmin(){
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='reviewlift-log.csv'; a.click();
   };
   $('#resetData').onclick=()=>{ if(confirm('Clear local data?')){ localStorage.removeItem(K.data); localStorage.removeItem(K.log); location.reload(); } };
+
+  // Backup / Restore
+  $('#exportData').onclick=()=>{
+    const blob=new Blob([JSON.stringify({S,LOG},null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='reviewlift-backup.json'; a.click();
+  };
+  $('#importData').onclick=()=>{
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+    inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader();
+      r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o.S){Object.assign(S,o.S);} if(Array.isArray(o.LOG)){LOG.splice(0,LOG.length,...o.LOG);} save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } };
+      r.readAsText(f);
+    }; inp.click();
+  };
 }
 
-// ===== Public page
+// Public page
 function renderPublic(){
   const payload = location.hash.replace('#/p/','');
-  const d = ub64(payload) || {n:'Your Business', c:'#4f46e5', l:'https://maps.google.com', msg: defaultMsg(), logo:''};
+  const d = ub64(payload) || buildPayload();
   document.body.style.background = 'linear-gradient(180deg,#f7f7fb,#eef2ff)';
+  document.querySelector('header').style.display='none';
+  document.querySelector('main').remove();
+  const app=document.createElement('div'); document.body.appendChild(app);
   app.innerHTML = `
     <div class="public">
       <div class="panel">
         <div style="display:flex;align-items:center;gap:10px">
-          ${d.logo? `<img src="${d.logo}" alt="logo" style="width:40px;height:40px;border-radius:8px">` : ''}
+          ${d.logo? `<img src="${d.logo}" alt="logo" style="width:40px;height:40px;border-radius:8px;border:1px solid var(--ring)">` : ''}
           <div style="font-weight:900;font-size:20px">${d.n}</div>
         </div>
-        <div style="margin:10px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
+        <div style="margin:12px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
         <div class="stack">
           <a class="btn" id="goBtn" style="text-decoration:none;display:inline-block;text-align:center;background:${d.c};color:#fff;border-radius:12px;padding:12px 14px;font-weight:800">Write a Google Review</a>
           <button id="copyInstr">Copy message</button>
@@ -273,3 +380,4 @@ function renderPublic(){
 </script>
 </body>
 </html>
+
