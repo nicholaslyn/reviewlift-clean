@@ -5,83 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"/>
 <title>ReviewLift — Reviews on Autopilot</title>
 <meta name="theme-color" content="#4f46e5"/>
-<link rel="manifest" href="manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json?v=v1">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --ink:#0f172a; --muted:#64748b; --bg:#f7f8ff; --panel:#ffffff;
+    --ink:#0f172a; --muted:#64748b; --ring:#e5e7eb;
+    --bg:#f7f8ff; --panel:#ffffff; --panel-muted:#fafafa;
     --brand:#4f46e5; --brand-ink:#1e1b4b; --brand-weak:#eef2ff;
-    --radius:16px; --shadow:0 12px 30px rgba(2,8,23,.10);
-    --ring:#e5e7eb; --grad:linear-gradient(180deg,#f7f8ff 0%, #eef2ff 100%);
+    --radius:14px; --shadow:0 8px 24px rgba(2,8,23,.08);
+    --grad:linear-gradient(180deg,#f7f8ff 0%, #eef2ff 100%);
+    --gap:14px; --pad:18px;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --ink:#e5e7eb; --muted:#9aa6b2; --bg:#0b1220; --panel:#0f172a; --brand-weak:#1f2240; --brand-ink:#c7d2fe; --ring:#1f2937; --grad:linear-gradient(180deg,#0b1220 0%, #131b2b 100%); }
+    :root{
+      --ink:#e5e7eb; --muted:#9aa6b2; --ring:#1f2937;
+      --bg:#0b1220; --panel:#0f172a; --panel-muted:#0c1424;
+      --brand-weak:#1f2240; --brand-ink:#c7d2fe; --grad:linear-gradient(180deg,#0b1220 0%, #131b2b 100%);
+      --shadow:0 8px 24px rgba(0,0,0,.35);
+    }
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);background-image:var(--grad);color:var(--ink);font:15px/1.6 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial}
   h1,h2,h3,.brand{font-family:"Plus Jakarta Sans", Inter, system-ui, sans-serif}
+  h2{font-size:18px;margin:0 0 10px 0}
   a{color:inherit;text-decoration:none}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.72));backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid rgba(2,8,23,.06)}
-  .wrap{max-width:1180px;margin:auto;padding:18px}
+  img{max-width:100%;display:block}
+  .wrap{max-width:1100px;margin:auto;padding:16px}
+
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(255,255,255,.72));backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid rgba(2,8,23,.06)}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
   .brand .dot{width:10px;height:10px;border-radius:999px;background:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 20%, transparent)}
   nav{display:flex;gap:8px;flex-wrap:wrap}
-  .tab{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(2,8,23,.10);background:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font-weight:600}
-  .tab svg{width:16px;height:16px;opacity:.8}
+  .tab{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(2,8,23,.10);background:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font-weight:700}
+  .tab svg{width:16px;height:16px;opacity:.85}
   .tab.active{background:var(--brand);color:#fff;border-color:transparent;box-shadow:0 8px 22px rgba(79,70,229,.28)}
-  main{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-  .stack{display:flex;flex-direction:column;gap:14px}
+  .tab:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 35%, transparent);outline-offset:2px}
+
+  main{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+  @media (max-width:1040px){ main{grid-template-columns:1fr} }
+
+  .stack{display:flex;flex-direction:column;gap:var(--gap)}
   .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .card{background:var(--panel);border:1px solid rgba(2,8,23,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-  .card h2{display:flex;align-items:center;gap:8px;margin:0 0 10px 0;font-size:17px}
-  .card h2 svg{width:18px;height:18px}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:720px){ .cols2{grid-template-columns:1fr} }
+
+  .card{background:var(--panel);border:1px solid rgba(2,8,23,.08);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--pad)}
   .hint{color:var(--muted);font-size:12px}
   input,select,textarea,button{border-radius:12px;border:1px solid rgba(2,8,23,.12);background:#fff;color:var(--ink);padding:10px 12px;font:inherit}
+  input,select,textarea{width:100%}
   textarea{min-height:96px}
   button{cursor:pointer;transition:transform .18s ease, box-shadow .18s ease}
-  button.primary{background:var(--brand);color:#fff;border-color:transparent;box-shadow:0 10px 22px rgba(79,70,229,.26);font-weight:700}
+  button.primary{background:var(--brand);color:#fff;border-color:transparent;box-shadow:0 10px 22px rgba(79,70,229,.22);font-weight:800}
   button.ghost{background:#fff}
   .btn-row button{display:inline-flex;align-items:center;gap:8px}
   .btn-row svg{width:16px;height:16px;opacity:.9}
-  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:var(--brand-weak);color:var(--brand-ink);font-weight:700}
-  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .qr{display:grid;place-items:center;background:#fff;border:1px dashed rgba(2,8,23,.18);border-radius:12px;min-height:260px}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:var(--brand-weak);color:var(--brand-ink);font-weight:800}
+
+  .logoPreview{width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid var(--ring);display:none}
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .kpi{border:1px solid rgba(2,8,23,.08);border-radius:14px;padding:14px;background:#fff}
+  @media (max-width:720px){ .kpis{grid-template-columns:1fr} }
+  .kpi{border:1px solid rgba(2,8,23,.08);border-radius:12px;padding:12px;background:#fff}
   .num{font-weight:800;font-size:24px}
-  .preset{width:28px;height:28px;border-radius:999px;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.15);cursor:pointer}
-  .logoPreview{width:48px;height:48px;border-radius:12px;object-fit:cover;border:1px solid var(--ring)}
-  .public{display:grid;place-items:center;min-height:100vh}
-  .public .panel{max-width:560px;margin:auto;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:18px;box-shadow:var(--shadow);padding:22px}
+  .qr{display:grid;place-items:center;background:#fff;border:1px dashed rgba(2,8,23,.18);border-radius:12px;min-height:240px}
+
+  .preview{border:1px solid var(--ring);border-radius:12px;padding:16px;background:#fff}
   .badge{margin-left:8px;font-size:12px;background:#eef2ff;color:#1e1b4b;padding:2px 8px;border-radius:999px}
-  @media (max-width:1040px){ main{grid-template-columns:1fr} }
+  .preset{width:28px;height:28px;border-radius:999px;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.15);cursor:pointer}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap hrow">
-    <div class="brand"><span class="dot"></span>ReviewLift <span class="hint" style="font-weight:600">— Reviews on Autopilot</span><span class="badge">v24</span></div>
+    <div class="brand"><span class="dot"></span>ReviewLift <span class="hint" style="font-weight:700">— Reviews on Autopilot</span><span class="badge">v24</span></div>
     <nav>
-      <button class="tab active" data-tab="setup" onclick="RL.showTab('setup')">
-        <!-- settings icon -->
+      <button class="tab active" data-tab="setup" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.05.06a2 2 0 1 1-2.83 2.83l-.06-.05A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1.5.9l-.03.06a2 2 0 1 1-3.94 0l-.03-.06a1.7 1.7 0 0 0-1.5-.9 1.7 1.7 0 0 0-1.88-.34l-.06.05a2 2 0 1 1-2.83-2.83l.05-.06A1.7 1.7 0 0 0 4.6 15c0-.34-.1-.67-.28-.96l-.05-.06a2 2 0 1 1 2.83-2.83l.06.05c.29.18.62.28.96.28.34 0 .67-.1.96-.28l.06-.05a2 2 0 1 1 2.83-2.83l-.05.06c-.18.29-.28.62-.28.96 0 .34.1.67.28.96l.05.06a2 2 0 1 1 2.83 2.83l-.06-.05c-.29-.18-.62-.28-.96-.28" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         Setup
       </button>
-      <button class="tab" data-tab="requests" onclick="RL.showTab('requests')">
-        <!-- msg icon -->
+      <button class="tab" data-tab="requests">
         <svg viewBox="0 0 24 24" fill="none"><path d="M21 12a8.5 8.5 0 1 1-4.9-7.75l.4.2" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 4.5 16 9l4.5-1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Requests
       </button>
-      <button class="tab" data-tab="replies" onclick="RL.showTab('replies')">
-        <!-- reply icon -->
+      <button class="tab" data-tab="replies">
         <svg viewBox="0 0 24 24" fill="none"><path d="M10 8V4l-6 6 6 6v-4c6 0 9 2 10 6-.5-6-4-10-10-10Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Reply Composer
+        Reply
       </button>
-      <button class="tab" data-tab="dashboard" onclick="RL.showTab('dashboard')">
-        <!-- chart icon -->
+      <button class="tab" data-tab="dashboard">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V9M12 20V4M20 20v-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         Dashboard
       </button>
@@ -90,158 +101,144 @@
 </header>
 
 <main class="wrap" id="tabs">
-  <!-- LEFT: MAIN PANES -->
+  <!-- LEFT -->
   <section class="card stack" data-pane="setup">
-    <h2><!-- spark icon --> <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v4M4.9 4.9l2.8 2.8M2 12h4M4.9 19.1l2.8-2.8M12 18v4M16.3 7.7l2.8-2.8M18 12h4M16.3 16.3l2.8 2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Business Setup</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px"><path d="M12 2v4M4.9 4.9l2.8 2.8M2 12h4M4.9 19.1l2.8-2.8M12 18v4M16.3 7.7l2.8-2.8M18 12h4M16.3 16.3l2.8 2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Business Setup</h2>
 
     <div class="row">
-      <label class="grow">Business name<br><input id="bizName" class="grow" placeholder="Acme Barbers"></label>
-      <label>Logo<br><input id="logoFile" type="file" accept="image/*" onchange="RL.onLogoChange(event)"></label>
-      <img id="logoPreview" class="logoPreview" alt="" style="display:none">
+      <label class="grow">Business name<br><input id="bizName" placeholder="Acme Barbers"></label>
+      <label style="min-width:220px">Google review link<br><input id="mapsLink" placeholder="Paste your Google write-review link"></label>
     </div>
 
-    <div class="row"><label class="grow">Google Maps / Reviews link<br><input id="mapsLink" class="grow" placeholder="Paste your Google listing link"></label></div>
-
-    <div class="stack">
-      <div class="row">
-        <label>Brand color<br><input id="brand" type="color" value="#4f46e5" onchange="RL.setBrand(this.value)"></label>
-        <div class="row" style="gap:10px">
-          <span class="hint">Presets:</span>
-          <div class="preset" style="background:#4f46e5" onclick="RL.setBrand('#4f46e5')"></div>
-          <div class="preset" style="background:#0ea5e9" onclick="RL.setBrand('#0ea5e9')"></div>
-          <div class="preset" style="background:#10b981" onclick="RL.setBrand('#10b981')"></div>
-          <div class="preset" style="background:#ef4444" onclick="RL.setBrand('#ef4444')"></div>
-          <div class="preset" style="background:#f59e0b" onclick="RL.setBrand('#f59e0b')"></div>
-          <div class="preset" style="background:#111827" onclick="RL.setBrand('#111827')"></div>
-        </div>
+    <div class="row">
+      <label style="min-width:180px">Brand color<br><input id="brand" type="color" value="#4f46e5"></label>
+      <div class="row" style="gap:10px">
+        <span class="hint">Presets:</span>
+        <button class="preset" style="background:#4f46e5" data-color="#4f46e5" aria-label="Indigo"></button>
+        <button class="preset" style="background:#0ea5e9" data-color="#0ea5e9" aria-label="Cyan"></button>
+        <button class="preset" style="background:#10b981" data-color="#10b981" aria-label="Green"></button>
+        <button class="preset" style="background:#ef4444" data-color="#ef4444" aria-label="Red"></button>
+        <button class="preset" style="background:#f59e0b" data-color="#f59e0b" aria-label="Amber"></button>
+        <button class="preset" style="background:#111827" data-color="#111827" aria-label="Black"></button>
       </div>
+    </div>
 
-      <label>Default ask message<br>
-        <textarea id="msg" placeholder="Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}"></textarea>
-      </label>
+    <div class="row">
+      <label>Logo<br><input id="logoFile" type="file" accept="image/*"></label>
+      <img id="logoPreview" class="logoPreview" alt="">
+    </div>
 
-      <div class="row btn-row">
-        <button id="saveSetup" class="primary" onclick="RL.saveSetup()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Save
-        </button>
-        <button id="copyLink" onclick="RL.copyLink()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M10 14a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 10a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          Copy Customer Link
-        </button>
-        <button id="showQR" onclick="RL.showQR()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 21h-3v-3h3zM12 12h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          Show QR
-        </button>
-        <button id="openPreview" class="ghost" onclick="RL.openPreview()">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Open public page
-        </button>
-        <span class="hint">Link/QR opens your branded review page.</span>
-      </div>
+    <label>Default ask message<br>
+      <textarea id="msg" placeholder="Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}"></textarea>
+    </label>
 
-      <div class="qr" id="qrBox" style="display:none">
-        <img id="qrImg" alt="QR will appear here"/>
-      </div>
+    <div class="row btn-row">
+      <button class="primary" id="saveSetup">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Save
+      </button>
+      <button id="copyLink">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M10 14a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 10a5 5 0 0 1 0 7l-1 1a5 5 0 0 1-7-7l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Copy Link
+      </button>
+      <button id="showQR">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM21 21h-3v-3h3zM12 12h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Show QR
+      </button>
+      <button id="openPreview" class="ghost">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Open public page
+      </button>
+      <span class="hint">Your link/QR opens a branded review page.</span>
+    </div>
 
-      <div class="cols2">
-        <div class="card">
-          <div class="pill">
-            <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px"><path d="M4 7h16M4 12h10M4 17h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            Backup
-          </div>
-          <div class="row btn-row" style="margin-top:10px">
-            <button id="exportData" onclick="RL.exportData()">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Export JSON
-            </button>
-            <button id="importData" onclick="RL.importData()">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 5h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Import JSON
-            </button>
-          </div>
-          <div class="hint">Back up your settings and log locally.</div>
+    <div class="qr" id="qrBox" style="display:none">
+      <img id="qrImg" alt="QR code"/>
+    </div>
+
+    <div class="cols2">
+      <div class="card">
+        <div class="pill">
+          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px"><path d="M4 7h16M4 12h10M4 17h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Backup
         </div>
-        <div class="card">
-          <div class="pill">
-            <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 3 2-7L2 9h7l3-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Install
-          </div>
-          <div class="stack" style="margin-top:10px">
-            <div class="hint">iPhone (Safari): Share → Add to Home Screen</div>
-            <div class="hint">Android (Chrome): Menu ⋮ → Add to Home screen</div>
-          </div>
+        <div class="row btn-row" style="margin-top:10px">
+          <button id="exportData">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4 4-4M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Export JSON
+          </button>
+          <button id="importData">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 5h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Import JSON
+          </button>
         </div>
+        <div class="hint">Back up your settings & log locally.</div>
       </div>
     </div>
   </section>
 
   <section class="card stack" data-pane="requests" style="display:none">
-    <h2><!-- chat icon --> <svg viewBox="0 0 24 24" fill="none"><path d="M21 12a8.5 8.5 0 1 1-8.5-8.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 4.5 16 9l4.5-1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Smart Ask</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px"><path d="M21 12a8.5 8.5 0 1 1-8.5-8.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 4.5 16 9l4.5-1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Smart Ask</h2>
     <div class="row">
-      <label>Customer first name<br><input id="firstName" placeholder="Sam" oninput="RL.refreshAsk()"></label>
-      <label>Visit type<br><input id="visit" placeholder="fade / oil change / cleaning" oninput="RL.refreshAsk()"></label>
+      <label>Customer first name<br><input id="firstName" placeholder="Sam"></label>
+      <label>Visit type<br><input id="visit" placeholder="fade / oil change / cleaning"></label>
     </div>
-    <div class="row"><textarea id="msgOut" class="grow" placeholder="Message will appear here..."></textarea></div>
+    <div class="row"><textarea id="msgOut" class="grow" placeholder="Message appears here…"></textarea></div>
     <div class="row btn-row">
-      <button id="copySMS" class="primary" onclick="RL.copySMS()">
+      <button id="copySMS" class="primary">
         <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         Copy SMS
       </button>
-      <button id="copyWhatsApp" onclick="RL.copyWhatsApp()">
+      <button id="copyWhatsApp">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 22a9.5 9.5 0 1 0-8.2-4.6L3 22l4.7-.8a9.5 9.5 0 0 0 4.3.8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         Copy WhatsApp
       </button>
-      <button id="copyEmail" onclick="RL.copyEmail()">
+      <button id="copyEmail">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         Copy Email
       </button>
-      <button id="copyLinkOnly" class="ghost" onclick="RL.copyLinkOnly()">
+      <button id="copyLinkOnly" class="ghost">
         <svg viewBox="0 0 24 24" fill="none"><path d="M10 14a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        Copy review link only
+        Copy link only
       </button>
-      <span class="hint">Paste into your messaging app. Each copy logs a request.</span>
+      <span class="hint">Paste into your messaging app. Copies are logged.</span>
     </div>
   </section>
 
   <section class="card stack" data-pane="replies" style="display:none">
-    <h2><!-- pen icon --> <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4l10-10-4-4L4 16v4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg> Reply Composer</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px"><path d="M4 20h4l10-10-4-4L4 16v4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg> Reply Composer</h2>
     <div class="row">
-      <label>Customer name<br><input id="rName" placeholder="Sam"></label>
-      <label>Stars<br>
-        <select id="rStars">
-          <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
-        </select>
-      </label>
+      <label>Customer name<br><input id="rName" placeholder="Alex"></label>
+      <label>Stars<br><select id="rStars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label>
     </div>
-    <div class="row"><textarea id="rText" class="grow" placeholder="Paste their review here (optional)"></textarea></div>
+    <div class="row"><textarea id="rText" class="grow" placeholder="Paste their review (optional)"></textarea></div>
     <div class="row btn-row">
-      <button class="primary" id="genReply" onclick="RL.genReply()">
+      <button class="primary" id="genReply">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Generate
+        Generate replies
       </button>
     </div>
     <div id="replyList" class="stack"></div>
   </section>
 
   <section class="card stack" data-pane="dashboard" style="display:none">
-    <h2><!-- chart icon --> <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V9M12 20V4M20 20v-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Dashboard</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px"><path d="M4 20V9M12 20V4M20 20v-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Dashboard</h2>
     <div class="kpis">
       <div class="kpi"><div class="num" id="kSent">0</div><div class="hint">Requests sent</div></div>
       <div class="kpi"><div class="num" id="kMarked">0</div><div class="hint">Reviews marked</div></div>
-      <div class="kpi"><div class="num" id="kConv">0%</div><div class="hint">Conversion (manual)</div></div>
+      <div class="kpi"><div class="num" id="kConv">0%</div><div class="hint">Conversion</div></div>
     </div>
     <div class="stack">
       <div class="row btn-row">
-        <button id="markReview" class="primary" onclick="RL.markReview()">
+        <button id="markReview" class="primary">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-          + Mark a new review
+          + Mark a review
         </button>
-        <button id="exportCSV" onclick="RL.exportCSV()">
+        <button id="exportCSV">
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4 4-4M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Export CSV
         </button>
-        <button id="resetData" onclick="RL.resetData()">
+        <button id="resetData">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 1 0 2.3 5.66" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Reset
         </button>
@@ -250,13 +247,13 @@
     </div>
   </section>
 
-  <!-- RIGHT: LIVE PREVIEW CARD -->
+  <!-- RIGHT: preview -->
   <aside class="card stack">
-    <h2><!-- eye icon --> <svg viewBox="0 0 24 24" fill="none"><path d="M1.5 12s3.5-7 10.5-7 10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg> Public page preview</h2>
-    <div id="preview" style="border:1px solid var(--ring);border-radius:14px;padding:16px;background:#fff">
+    <h2><svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px"><path d="M1.5 12s3.5-7 10.5-7 10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg> Public page preview</h2>
+    <div id="preview" class="preview">
       <div style="display:flex;align-items:center;gap:10px">
         <img id="pvLogo" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--ring);display:none" alt="">
-        <div id="pvName" style="font-weight:800;font-family:'Plus Jakarta Sans',Inter,sans-serif">Your Business</div>
+        <div id="pvName" style="font-weight:900;font-family:'Plus Jakarta Sans',Inter,sans-serif">Your Business</div>
       </div>
       <div style="margin:10px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
       <a id="pvBtn" style="display:inline-block;padding:12px 14px;border-radius:12px;color:#fff;background:var(--brand);font-weight:800">Write a Google Review</a>
@@ -266,97 +263,139 @@
 </main>
 
 <!-- Toasts -->
-<div class="wrap" id="toastBox" style="position:fixed;inset:auto 18px 18px auto;display:flex;flex-direction:column;gap:8px;z-index:50"></div>
+<div class="wrap" id="toastBox" style="position:fixed;inset:auto 16px 16px auto;display:flex;flex-direction:column;gap:8px;z-index:50"></div>
 
 <script>
+/* ------- ZERO-FLAKE APP SCRIPT ------- */
 (function(){
-  const $ = (sel, el=document) => el.querySelector(sel);
+  // Bump this when you deploy to bust cache automatically in links/QRs.
+  const VERSION = 'v1';
+
+  // Base helpers
+  const b64 = (o)=> btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  const ub64 = (s)=>{ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } };
+  const defaultMsg = ()=>`Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`;
+
+  // Local storage keys
   const K = { data:'rl_data_v1', log:'rl_log_v1' };
+
+  // Build payload from local data (or defaults)
+  const S0 = JSON.parse(localStorage.getItem(K.data) || '{}');
+  const payload0 = ()=>({ n:S0.bizName||'Your Business', c:S0.brand||'#4f46e5', l:S0.mapsLink||'https://maps.google.com', msg:S0.msg||defaultMsg(), logo:S0.logo||'' });
+
+  // PUBLIC ROUTE (hash) — render and exit early
+  if ((location.hash||'').startsWith('#/p/')) {
+    const d = ub64(location.hash.replace('#/p/','')) || payload0();
+    document.documentElement.innerHTML = `
+    <head>
+      <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+      <title>${d.n} — Review</title>
+      <style>
+        :root{--ring:#e5e7eb;--shadow:0 8px 24px rgba(2,8,23,.08)}
+        body{margin:0;font:15px/1.6 Inter,system-ui;background:#f7f8ff}
+        .panel{max-width:560px;margin:40px auto;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:18px;box-shadow:var(--shadow);padding:22px}
+        .hint{color:#475569;font-size:12px}
+        .btn{display:inline-block;text-decoration:none;text-align:center;color:#fff;border-radius:12px;padding:12px 14px;font-weight:800}
+      </style>
+    </head>
+    <body>
+      <div class="panel">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${d.logo? `<img src="${d.logo}" alt="logo" style="width:44px;height:44px;border-radius:10px;border:1px solid var(--ring)">` : ''}
+          <div style="font-weight:900;font-size:20px;font-family:'Plus Jakarta Sans',Inter,sans-serif">${d.n}</div>
+        </div>
+        <div style="margin:12px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a class="btn" id="goBtn" style="background:${d.c}">Write a Google Review</a>
+          <button id="copyInstr" style="border-radius:12px;border:1px solid var(--ring);padding:10px 12px;background:#fff">Copy message</button>
+        </div>
+        <div class="hint" style="margin-top:8px">If the button doesn't open directly, tap “Reviews” then “Write a review” on Google.</div>
+      </div>
+      <script>
+        const d = ${JSON.stringify(d)};
+        document.getElementById('goBtn').href = d.l;
+        document.getElementById('copyInstr').onclick=()=>{ navigator.clipboard.writeText((d.msg||${defaultMsg.toString()}()).replace('{firstName}','').replace('{visit}','visit').replace('{link}', d.l)); alert('Message copied'); };
+      <\/script>
+    </body>`;
+    return; // stop admin app from booting
+  }
+
+  // ===== ADMIN APP =====
+  const $ = (sel, el=document) => el.querySelector(sel);
   const S = JSON.parse(localStorage.getItem(K.data) || '{}');
   const LOGS = JSON.parse(localStorage.getItem(K.log) || '[]');
   const save = ()=>{ localStorage.setItem(K.data, JSON.stringify(S)); localStorage.setItem(K.log, JSON.stringify(LOGS)); };
   const toast=(msg)=>{ const t=document.createElement('div'); t.textContent=msg; t.style.cssText='background:#0f172a;color:#fff;padding:10px 12px;border-radius:12px;box-shadow:0 10px 24px rgba(2,8,23,.25)'; $('#toastBox').appendChild(t); setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),260)},1900); };
-  const b64=(o)=> btoa(unescape(encodeURIComponent(JSON.stringify(o))));
-  const ub64=(s)=>{ try{ return JSON.parse(decodeURIComponent(escape(atob(s)))); }catch(e){ return null; } };
-  const defaultMsg=()=>`Hey {firstName}! It was great seeing you today. If we earned your 5★, would you mind leaving a quick review? {link}`;
-  const payload=()=>({ n:S.bizName||'Your Business', c:S.brand||'#4f46e5', l:S.mapsLink||'https://maps.google.com', msg:S.msg||defaultMsg(), logo:S.logo||'' });
-  const publicLink=()=> location.origin+location.pathname+'#/p/'+b64(payload());
-  const setBrandColor=(c)=>{ document.documentElement.style.setProperty('--brand', c||'#4f46e5'); $('#pvBtn').style.background = c||'#4f46e5'; };
 
-  // ROUTING
-  if ((location.hash||'') .startsWith('#/p/')) {
-    const d = ub64(location.hash.replace('#/p/','')) || payload();
-    document.body.innerHTML = `
-      <div class="public">
-        <div class="panel">
-          <div style="display:flex;align-items:center;gap:10px">
-            ${d.logo? `<img src="${d.logo}" alt="logo" style="width:44px;height:44px;border-radius:10px;border:1px solid var(--ring)">` : ''}
-            <div style="font-weight:900;font-size:20px;font-family:'Plus Jakarta Sans',Inter,sans-serif">${d.n}</div>
-          </div>
-          <div style="margin:12px 0;color:#475569">It only takes 30 seconds. Your feedback helps local customers find us. Thank you!</div>
-          <div class="stack">
-            <a class="btn" id="goBtn" style="text-decoration:none;display:inline-block;text-align:center;background:${d.c};color:#fff;border-radius:12px;padding:12px 14px;font-weight:800">Write a Google Review</a>
-            <button id="copyInstr" style="border-radius:12px;border:1px solid var(--ring);padding:10px 12px;background:#fff">Copy message</button>
-          </div>
-          <div class="hint" style="margin-top:8px">If the button doesn't open directly, tap “Reviews” then “Write a review” on Google.</div>
-        </div>
-      </div>`;
-    document.getElementById('goBtn').href = d.l;
-    document.getElementById('copyInstr').onclick=()=>{ navigator.clipboard.writeText((d.msg||defaultMsg()).replace('{firstName}','').replace('{visit}','visit').replace('{link}', d.l)); alert('Message copied'); };
-    return;
-  }
+  // Brand/apply color
+  const setBrandColor=(c)=>{ document.documentElement.style.setProperty('--brand', c||'#4f46e5'); const btn=$('#pvBtn'); if(btn) btn.style.background = c||'#4f46e5'; };
 
-  // --- ADMIN INIT ---
-  // Populate fields
+  // Build a public link with version BEFORE the hash (cache-busting)
+  const publicLink=()=> `${location.origin}${location.pathname}?${VERSION}#/p/${b64({ n:S.bizName||'Your Business', c:S.brand||'#4f46e5', l:S.mapsLink||'https://maps.google.com', msg:S.msg||defaultMsg(), logo:S.logo||'' })}`;
+
+  // Init fields
   $('#bizName').value=S.bizName||'';
   $('#mapsLink').value=S.mapsLink||'';
   $('#brand').value=S.brand||'#4f46e5';
   $('#msg').value=S.msg||defaultMsg();
-  if(S.logo){ const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; $('#pvLogo').src=S.logo; $('#pvLogo').style.display='block'; }
+  if(S.logo){ const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; const pv=$('#pvLogo'); pv.src=S.logo; pv.style.display='block'; }
   setBrandColor(S.brand||'#4f46e5');
   $('#pvName').textContent = S.bizName || 'Your Business';
 
-  // Expose actions
-  window.RL = {
-    showTab: (pane)=>{
-      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  // App API
+  const RL = {
+    showTab(pane){
+      document.querySelectorAll('.tab').forEach(b=>{ b.classList.remove('active'); b.removeAttribute('aria-current'); });
       document.querySelectorAll('[data-pane]').forEach(p=>p.style.display=(p.dataset.pane===pane)?'block':'none');
-      document.querySelector(`.tab[data-tab="${pane}"]`)?.classList.add('active');
-      // Scroll to top of pane on mobile
+      const btn = document.querySelector(`.tab[data-tab="${pane}"]`);
+      if (btn){ btn.classList.add('active'); btn.setAttribute('aria-current','page'); }
       window.scrollTo({top:0,behavior:'smooth'});
     },
-    setBrand: (c)=>{
+    setBrand(c){
       $('#brand').value=c; S.brand=c; save(); setBrandColor(c); toast('Color set');
     },
-    onLogoChange: (e)=>{
-      const f=e.target.files[0]; if(!f) return;
-      const r=new FileReader(); r.onload=()=>{ S.logo=r.result; save(); const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; $('#pvLogo').src=S.logo; $('#pvLogo').style.display='block'; toast('Logo saved'); }; r.readAsDataURL(f);
+    onLogoChange(file){
+      const f=file; if(!f) return;
+      const r=new FileReader(); r.onload=()=>{ S.logo=r.result; save(); const p=$('#logoPreview'); p.src=S.logo; p.style.display='block'; const pv=$('#pvLogo'); pv.src=S.logo; pv.style.display='block'; toast('Logo saved'); }; r.readAsDataURL(f);
     },
-    saveSetup: ()=>{
+    saveSetup(){
       S.bizName=$('#bizName').value.trim()||'Your Business';
       S.mapsLink=$('#mapsLink').value.trim()||'https://maps.google.com';
       S.brand=$('#brand').value||'#4f46e5';
       S.msg=$('#msg').value.trim()||defaultMsg();
       save(); setBrandColor(S.brand); $('#pvName').textContent=S.bizName; toast('Saved.');
     },
-    copyLink: ()=>{ navigator.clipboard.writeText(publicLink()).then(()=>toast('Link copied'),()=>toast('Copy failed—paste manually')); },
-    openPreview: ()=> window.open(publicLink(),'_blank'),
-    showQR: ()=>{
-      $('#qrBox').style.display='grid';
-      $('#qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicLink())}`;
+    copyLink(){
+      const text = publicLink();
+      (navigator.clipboard?.writeText(text).then(()=>true).catch(()=>false)).then(ok=>{
+        if(!ok){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+        toast('Link copied');
+      });
     },
-    refreshAsk: ()=>{
+    openPreview(){ window.open(publicLink(),'_blank'); },
+    showQR(){
+      const link = publicLink();
+      $('#qrBox').style.display='grid';
+      $('#qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&margin=0&data=${encodeURIComponent(link)}`;
+    },
+    refreshAsk(){
       const out=(S.msg||defaultMsg())
         .replace('{firstName}', ($('#firstName').value||'').trim() || 'there')
         .replace('{visit}', ($('#visit').value||'').trim() || 'visit')
         .replace('{link}', publicLink());
       $('#msgOut').value=out;
     },
-    copySMS: ()=>{ RL.refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); LOGS.push({type:'send',channel:'sms',at:new Date().toISOString(),link:publicLink()}); save(); toast('SMS copied'); },
-    copyWhatsApp: ()=>{ RL.refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); LOGS.push({type:'send',channel:'whatsapp',at:new Date().toISOString(),link:publicLink()}); save(); toast('WhatsApp copied'); },
-    copyEmail: ()=>{ RL.refreshAsk(); navigator.clipboard.writeText($('#msgOut').value); LOGS.push({type:'send',channel:'email',at:new Date().toISOString(),link:publicLink()}); save(); toast('Email copied'); },
-    copyLinkOnly: ()=>{ navigator.clipboard.writeText(publicLink()); LOGS.push({type:'send',channel:'link',at:new Date().toISOString(),link:publicLink()}); save(); toast('Review link copied'); },
-    genReply: ()=>{
+    copy(channel){
+      RL.refreshAsk();
+      const map={sms:'SMS', whatsapp:'WhatsApp', email:'Email', link:'Review link'};
+      const text = channel==='link' ? publicLink() : $('#msgOut').value;
+      (navigator.clipboard?.writeText(text).then(()=>true).catch(()=>false)).then(ok=>{
+        if(!ok){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+        LOGS.push({type:'send',channel,at:new Date().toISOString(),link:publicLink()}); save();
+        toast(`${map[channel]} copied`);
+      });
+    },
+    genReply(){
       const name=($('#rName').value||'').trim(), stars=+$('#rStars').value;
       const tone={
         5:[`Thanks${name?`, ${name}`:''}! We’re pumped you loved your visit.`,
@@ -378,29 +417,60 @@
       const list=tone[stars]||tone[5]; const host=$('#replyList'); host.innerHTML='';
       list.forEach(s=>{ const p=document.createElement('div'); p.className='card'; p.style.padding='10px'; p.textContent=s;
         const row=document.createElement('div'); row.className='row'; row.style.marginTop='6px';
-        const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s); toast('Copied'); };
+        const b=document.createElement('button'); b.textContent='Copy'; b.onclick=()=>{ navigator.clipboard.writeText(s).catch(()=>{}); toast('Copied'); };
         row.appendChild(b); p.appendChild(row); host.appendChild(p);
       });
     },
-    markReview: ()=>{ LOGS.push({type:'review',at:new Date().toISOString()}); save(); RL.renderKpis(); toast('Marked'); },
-    exportCSV: ()=>{ const rows=[['type','channel','at','link']].concat(LOGS.map(x=>[x.type,x.channel||'',x.at||'',x.link||''])); const csv=rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='reviewlift-log.csv'; a.click(); },
-    resetData: ()=>{ if(confirm('Clear local data?')){ localStorage.removeItem(K.data); localStorage.removeItem(K.log); location.reload(); } },
-    exportData: ()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({S,LOGS},null,2)],{type:'application/json'})); a.download='reviewlift-backup.json'; a.click(); },
-    importData: ()=>{ const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o.S) Object.assign(S,o.S); if(Array.isArray(o.LOGS)) { LOGS.splice(0,LOGS.length,...o.LOGS); } save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } }; r.readAsText(f); }; inp.click(); },
-    renderKpis: ()=>{ const sent=LOGS.filter(x=>x.type==='send').length; const marked=LOGS.filter(x=>x.type==='review').length; $('#kSent').textContent=sent; $('#kMarked').textContent=marked; $('#kConv').textContent = sent? Math.round(marked/sent*100)+'%' : '0%'; }
+    markReview(){ LOGS.push({type:'review',at:new Date().toISOString()}); save(); RL.renderKpis(); toast('Marked'); },
+    exportCSV(){ const rows=[['type','channel','at','link']].concat(LOGS.map(x=>[x.type,x.channel||'',x.at||'',x.link||''])); const csv=rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='reviewlift-log.csv'; a.click(); },
+    resetData(){ if(confirm('Clear local data?')){ localStorage.removeItem(K.data); localStorage.removeItem(K.log); location.reload(); } },
+    exportData(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({S,LOGS},null,2)],{type:'application/json'})); a.download='reviewlift-backup.json'; a.click(); },
+    importData(){ const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const o=JSON.parse(r.result); if(o.S) Object.assign(S,o.S); if(Array.isArray(o.LOGS)) { LOGS.splice(0,LOGS.length,...o.LOGS); } save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } }; r.readAsText(f); }; inp.click(); },
+    renderKpis(){ const sent=LOGS.filter(x=>x.type==='send').length; const marked=LOGS.filter(x=>x.type==='review').length; $('#kSent').textContent=sent; $('#kMarked').textContent=marked; $('#kConv').textContent = sent? Math.round(marked/sent*100)+'%' : '0%'; }
   };
 
+  // Expose globally (just in case)
+  window.RL = RL;
+
+  // Wire UI after RL exists
+  document.querySelectorAll('nav .tab').forEach(btn=> btn.addEventListener('click', ()=> RL.showTab(btn.dataset.tab)));
+  $('#brand').addEventListener('input', e=> RL.setBrand(e.target.value));
+  document.querySelectorAll('.preset').forEach(p=> p.addEventListener('click', ()=> RL.setBrand(p.dataset.color)));
+  $('#logoFile').addEventListener('change', e=> RL.onLogoChange(e.target.files[0]));
+  $('#bizName').addEventListener('input', ()=> $('#pvName').textContent = $('#bizName').value.trim() || 'Your Business');
+
+  // Setup buttons
+  $('#saveSetup').addEventListener('click', RL.saveSetup);
+  $('#copyLink').addEventListener('click', RL.copyLink);
+  $('#showQR').addEventListener('click', RL.showQR);
+  $('#openPreview').addEventListener('click', RL.openPreview);
+
+  // Requests
+  const refresh = ()=> RL.refreshAsk();
+  $('#firstName').addEventListener('input', refresh);
+  $('#visit').addEventListener('input', refresh);
+  $('#copySMS').addEventListener('click', ()=> RL.copy('sms'));
+  $('#copyWhatsApp').addEventListener('click', ()=> RL.copy('whatsapp'));
+  $('#copyEmail').addEventListener('click', ()=> RL.copy('email'));
+  $('#copyLinkOnly').addEventListener('click', ()=> RL.copy('link'));
+
+  // Replies
+  $('#genReply').addEventListener('click', RL.genReply);
+
+  // Dashboard
+  $('#markReview').addEventListener('click', RL.markReview);
+  $('#exportCSV').addEventListener('click', RL.exportCSV);
+  $('#resetData').addEventListener('click', RL.resetData);
+
+  // Backup
+  $('#exportData').addEventListener('click', RL.exportData);
+  $('#importData').addEventListener('click', RL.importData);
+
+  // First render
   RL.renderKpis();
   RL.refreshAsk();
-
-  // Also wire nav buttons for keyboard/mouse
-  document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click', ()=> RL.showTab(btn.dataset.tab)));
-
-  // Live preview updates while typing
-  $('#bizName').addEventListener('input', ()=> $('#pvName').textContent = $('#bizName').value.trim() || 'Your Business');
-  $('#brand').addEventListener('input', (e)=> setBrandColor(e.target.value));
-
 })();
 </script>
 </body>
 </html>
+
