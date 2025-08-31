@@ -324,6 +324,7 @@
     },
     setBrand(c){
       $('#brand').value=c; S.brand=c; save(); setBrandColor(c); toast('Color set');
+      window.RL = RL; // expose RL globally so inline onclick="RL.*" works
     },
     onLogoChange(file){
       const f=file; if(!f) return;
